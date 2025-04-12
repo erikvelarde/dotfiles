@@ -6,7 +6,7 @@ vim.cmd("set background=dark")
 opt.number = true
 opt.relativenumber = true
 opt.showcmd = false
-opt.showtabline = 0
+-- opt.showtabline = 0
 
 opt.undofile = true
 
@@ -43,3 +43,4 @@ opt.splitbelow = true -- split horizontal window to the bottom
 opt.iskeyword:append("-") -- consider string-string as whole word
 opt.showcmd = true
 opt.showmode = false
+opt.showtabline = 0

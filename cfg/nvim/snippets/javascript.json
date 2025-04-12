@@ -1,0 +1,7 @@
+{
+  "Console Log Fuck": {
+    "prefix": "fuck",
+    "body": "console.log(\"fuck $1\");",
+    "description": "Console log fuck"
+  }
+}

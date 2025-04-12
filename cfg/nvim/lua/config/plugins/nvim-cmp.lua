@@ -18,6 +18,7 @@ return {
 
 		-- load vs-code like snippets from plugins (e.g. friendly-snippets)
 		require("luasnip.loaders.from_vscode").lazy_load({ priority = 10 })
+		require("luasnip.loaders.from_vscode").lazy_load({ paths = { "./snippets" } })
 
 		vim.opt.completeopt = "menu,menuone,noselect"
 		cmp.setup({
