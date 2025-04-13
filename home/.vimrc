@@ -64,7 +64,7 @@ inoremap " ""<left>
 inoremap ' ''<left>
 inoremap ( ()<left>
 inoremap [ []<left>
-inoremap < <><left>
+" inoremap < <><left>
 inoremap { {}<left>
 inoremap {<CR> {<CR>}<ESC>O
 inoremap {;<CR> {<CR>};<ESC>O
@@ -169,7 +169,7 @@ if $COLORTERM == 'gnome-terminal'
 endif
 
 try
-    colorscheme default
+    colorscheme zaibatsu
 catch
 endtry
 
@@ -413,3 +413,22 @@ function! VisualSelection(direction, extra_filter) range
     let @/ = l:pattern
     let @" = l:saved_reg
 endfunction
+
+" Change cursor shape between insert and normal mode
+if &term =~ '^xterm'
+    " Use a thin vertical bar cursor in insert mode
+    let &t_SI = "\e[5 q"
+    " Use a solid block cursor in normal mode
+    let &t_EI = "\e[2 q"
+endif
+
+" For terminal supporting DECSCUSR
+if exists('$TMUX')
+    " In TMUX, use these settings
+    let &t_SI = "\<Esc>Ptmux;\<Esc>\<Esc>[5 q\<Esc>\\"
+    let &t_EI = "\<Esc>Ptmux;\<Esc>\<Esc>[2 q\<Esc>\\"
+elseif &term =~ "screen"
+    " For screen/tmux compatibility
+    let &t_SI = "\<Esc>[5 q"
+    let &t_EI = "\<Esc>[2 q"
+endif

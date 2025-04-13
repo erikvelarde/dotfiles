@@ -73,3 +73,8 @@ export PATH=$ANDROID_HOME/platform-tools:$PATH
 export PATH="$HOME/go/bin/lazygit:$PATH"
 eval "$(fzf --zsh)"
 # bindkey -M vicmd v edit-command-line
+
+# clang
+export CLANG_FORMAT_STYLE=file
+export CLANG_FORMAT_CONFIG=~/.config/nvim/clang/.clang-format
+export PATH=/home/erick/go/bin/lazygit:/home/erick/Android/Sdk/platform-tools:/home/erick/Android/Sdk/cmdline-tools/bin:/home/erick/.flutter_install/flutter/bin:/opt/vcpkg:/home/erick/.nvm/versions/node/v20.14.0/bin:/usr/condabin:/home/erick/.cargo/bin:/sbin:/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/sbin:/usr/lib/jvm/default/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl:/home/erick/.config/pycopy:/home/erick/.config/java-features:/home/erick/.config/java-craft:/home/erick/.config/pycopy:/home/erick/.config/composer/vendor/bin:/home/erick/.local/bin:/home/erick/.config/pycopy
