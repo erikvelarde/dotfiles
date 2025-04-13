@@ -9,7 +9,7 @@ font-style-bold = "JetBrains Mono Bold"
 font-style-italic = "JetBrains Mono Italic"
 font-style-bold-italic= "JetBrains Mono Bold Italic"
 
-font-size = 16
+font-size = 12
 
 adjust-cursor-thickness = 1
 window-decoration = false
@@ -31,16 +31,14 @@ palette = 13=#f2a4db
 palette = 14=#5abfb5
 palette = 15=#b5bfe2
 # background = #181926
-# background = #000000
-background = #010409
+background = #000000
 foreground = #c6d0f5
 cursor-color = #f2d5cf
 cursor-text = #c6d0f5
 selection-background = #181926
 selection-foreground = #c6d0f5
 
-# background-opacity = 0.7
-background-opacity = 1.0
+background-opacity = 0.7
 gtk-tabs-location = hidden
 gtk-titlebar=false
 
@@ -81,4 +79,3 @@ window-padding-balance = true
 
 window-padding-x = 0
 window-padding-y = 0
-
