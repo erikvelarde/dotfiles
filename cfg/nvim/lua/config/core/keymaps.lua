@@ -69,12 +69,12 @@ keymap.set("n", "mm", ":put 1 <CR>", { silent = true })
 keymap.set({ "n", "v" }, "<C-/>", "<Plug>NERDCommenterToggle", { silent = true })
 keymap.set({ "n", "v" }, "gc", "<Plug>NERDCommenterToggle", { silent = true })
 
--- keymap.set("n", "<A-2>", ":bnext <CR>==", { silent = true })
--- keymap.set("n", "<A-1>", ":bprevious <CR>==", { silent = true })
--- keymap.set("n", "<A-`>", ":bdelete <CR>==", { silent = true })
-keymap.set("n", "t", ":bnext <CR>==", { silent = true })
-keymap.set("n", "T", ":bprevious <CR>==", { silent = true })
+keymap.set("n", "<A-2>", ":bnext <CR>==", { silent = true })
+keymap.set("n", "<A-1>", ":bprevious <CR>==", { silent = true })
 keymap.set("n", "<A-`>", ":bdelete <CR>==", { silent = true })
+-- keymap.set("n", "t", ":bnext <CR>==", { silent = true })
+-- keymap.set("n", "T", ":bprevious <CR>==", { silent = true })
+-- keymap.set("n", "<A-`>", ":bdelete <CR>==", { silent = true })
 
 keymap.set("n", "<leader>w", ":bnext <CR>==", { silent = true })
 keymap.set("n", "<leader>q", ":bprevious <CR>==", { silent = true })
@@ -190,10 +190,10 @@ keymap.set("n", "]d", vim.diagnostic.goto_next, { desc = "Go to Next Diagnostic"
 keymap.set("n", "<leader>sd", "<cmd>Telescope diagnostics<CR>", { desc = "Search Diagnostics" })
 
 -- -- Harpoon
--- keymap.set("n", "<leader>ha", '<cmd>lua require("harpoon.mark").add_file()<CR>', { desc = "Harpoon file" })
--- keymap.set("n", "<leader>hl", '<cmd>lua require("harpoon.ui").toggle_quick_menu()<CR>', { desc = "Files Harpooned" })
--- keymap.set("n", "t", '<cmd>lua require("harpoon.ui").nav_next()<CR>', { desc = "Harpoon file" })
--- keymap.set("n", "T", '<cmd>lua require("harpoon.ui").nav_prev()<CR>', { desc = "Harpoon file" })
+keymap.set("n", "<leader>ha", '<cmd>lua require("harpoon.mark").add_file()<CR>', { desc = "Harpoon file" })
+keymap.set("n", "<leader>hl", '<cmd>lua require("harpoon.ui").toggle_quick_menu()<CR>', { desc = "Files Harpooned" })
+keymap.set("n", "t", '<cmd>lua require("harpoon.ui").nav_next()<CR>', { desc = "Harpoon file" })
+keymap.set("n", "T", '<cmd>lua require("harpoon.ui").nav_prev()<CR>', { desc = "Harpoon file" })
 -- Harpoon
 
 -- format
