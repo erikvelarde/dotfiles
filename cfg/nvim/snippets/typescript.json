@@ -1,7 +1,0 @@
-{
-  "Console Log Fuck ts": {
-    "prefix": "fuckts",
-    "body": "console.log(\"$1\");",
-    "description": "Console log fuck"
-  }
-}
