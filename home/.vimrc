@@ -432,3 +432,210 @@ elseif &term =~ "screen"
     let &t_SI = "\<Esc>[5 q"
     let &t_EI = "\<Esc>[2 q"
 endif
+
+" ----
+" Completion popup options
+set completeopt=menuone,noinsert
+set complete=b
+
+" Trigger only after 2+ characters typed
+autocmd InsertCharPre * call AutoCompleteBuffer()
+function! AutoCompleteBuffer()
+  let col = col('.') - 1
+  if col >= 2 && !pumvisible()
+    call feedkeys("\<C-x>\<C-n>", "n")
+  endif
+endfunction
+
+" Navigate popup with <C-j> and <C-k>
+inoremap <expr> <C-j> pumvisible() ? "\<C-n>" : "\<C-j>"
+inoremap <expr> <C-k> pumvisible() ? "\<C-p>" : "\<C-k>"
+
+" Keymaps
+" Set leader
+let mapleader = " "
+
+" Escape insert mode
+inoremap jk <ESC>
+vnoremap ii <ESC>
+
+" Create a new tab with a new file
+" nnoremap <leader>jf :tabnew | w<CR>
+
+" Indent entire file
+nnoremap ,a gg=G
+
+" Fold selected code
+vnoremap fc :fold<CR>
+
+" Save file
+nnoremap <leader>s :w<CR>
+
+" Clear search highlights
+nnoremap <leader>nh :nohl<CR>
+
+" Delete without yanking
+nnoremap x "_x
+vnoremap x "_x
+
+" Enable/disable system clipboard
+" nnoremap <leader>mn :set clipboard=unnamedplus | echo 'clipboard enabled'<CR>
+" nnoremap <leader>m, :set clipboard= | echo 'clipboard disabled'<CR>
+
+" Find hovered word
+nnoremap <leader>fw *
+
+" Select all
+nnoremap <C-a> ggVG
+
+" Move lines up/down in normal mode
+nnoremap <A-k> :m-2<CR>==
+nnoremap <A-j> :m+<CR>==
+
+" Move selected lines up/down
+vnoremap <A-K> :m '<-2<CR>gv=gv
+vnoremap <A-J> :m '>+1<CR>gv=gv
+
+" Insert line from register 1 (like 'mm' in your config)
+nnoremap mm :put 1<CR>
+
+" Buffer navigation (if you're using multiple buffers manually)
+nnoremap <A-2> :bnext<CR>
+nnoremap <A-1> :bprevious<CR>
+nnoremap <A-`> :bdelete<CR>
+
+nnoremap <leader>w :bnext<CR>
+nnoremap <leader>q :bprevious<CR>
+nnoremap <leader>x :bdelete<CR>
+
+" Quotes/Brackets wrapper
+vnoremap " di"<ESC>pa"<ESC>x
+vnoremap ` di`<ESC>pa`<ESC>x
+vnoremap ' di'<ESC>pa'<ESC>x
+vnoremap ( di(<ESC>pa)<ESC>x
+vnoremap [ di[<ESC>pa]<ESC>x
+vnoremap { di{<ESC>pa}<ESC>x
+
+" Split windows
+nnoremap <leader>sv <C-w>v
+nnoremap <leader>sh <C-w>s
+nnoremap <leader>se <C-w>=
+nnoremap <leader>sx :close<CR>
+
+" Resize windows
+nnoremap f> :vertical resize +10<CR>
+nnoremap f< :vertical resize -10<CR>
+nnoremap g> :resize +3<CR>
+nnoremap g< :resize -3<CR>
+
+nnoremap <A-i> :vertical resize +10<CR>
+nnoremap <A-s> :vertical resize -10<CR>
+nnoremap <A-u> :resize +10<CR>
+nnoremap <A-d> :resize -10<CR>
+
+" Increment / Decrement
+nnoremap + <C-a>
+nnoremap - <C-x>
+
+" Change without yanking
+nnoremap ciw "_ciw
+vnoremap c "_c
+
+" Delete till EOL without yanking
+nnoremap d$ "_d$
+vnoremap d$ "_d$
+
+" Change everything without yanking
+nnoremap c "_c
+vnoremap c "_c
+
+" Focus mode toggles
+nnoremap <leader>ef :set nonumber norelativenumber laststatus=0 showtabline=0<CR>
+nnoremap <leader>df :set number relativenumber laststatus=2 showtabline=2<CR>
+
+" Restore folds per file
+augroup remember_folds
+  autocmd!
+  autocmd BufWinLeave * mkview 1
+  autocmd BufWinEnter * silent! loadview 1
+augroup END
+
+
+" Normal mode: Toggle comment on current line
+nnoremap gcc :call ToggleCommentLine()<CR>
+
+" Visual mode: Toggle comment on selected lines
+vnoremap gcc :call ToggleCommentVisual()<CR>
+
+function! GetCommentSymbol()
+    let ft = &filetype
+    return get({
+        \ 'c': '//',
+        \ 'cpp': '//',
+        \ 'java': '//',
+        \ 'javascript': '//',
+        \ 'typescript': '//',
+        \ 'go': '//',
+        \ 'rust': '//',
+        \ 'python': '#',
+        \ 'sh': '#',
+        \ 'bash': '#',
+        \ 'lua': '--',
+        \ 'vim': '"',
+        \ 'sql': '--',
+        \ 'html': '<!--',
+        \ 'xml': '<!--',
+        \ }, ft, '#') " default to #
+endfunction
+
+function! ToggleCommentLine()
+    let symbol = GetCommentSymbol()
+    let line = getline('.')
+
+    if symbol == '<!--'
+        if line =~ '^\s*<!--'
+            let line = substitute(line, '^\s*<!--\s*', '', '')
+            let line = substitute(line, '\s*-->$', '', '')
+        else
+            let line = substitute(line, '^\s*', '\0<!-- ', '')
+            let line .= ' -->'
+        endif
+    else
+        if line =~ '^\s*' . escape(symbol, '#/.*~')
+            let line = substitute(line, '^\(\s*\)' . escape(symbol, '#/.*~') . '\s*', '\1', '')
+        else
+            let line = substitute(line, '^\s*', '\0' . symbol . ' ', '')
+        endif
+    endif
+
+    call setline('.', line)
+endfunction
+
+function! ToggleCommentVisual()
+    let symbol = GetCommentSymbol()
+    let start = line("'<")
+    let end = line("'>")
+
+    for lnum in range(start, end)
+        let line = getline(lnum)
+
+        if symbol == '<!--'
+            if line =~ '^\s*<!--'
+                let line = substitute(line, '^\s*<!--\s*', '', '')
+                let line = substitute(line, '\s*-->$', '', '')
+            else
+                let line = substitute(line, '^\s*', '\0<!-- ', '')
+                let line .= ' -->'
+            endif
+        else
+            if line =~ '^\s*' . escape(symbol, '#/.*~')
+                let line = substitute(line, '^\(\s*\)' . escape(symbol, '#/.*~') . '\s*', '\1', '')
+            else
+                let line = substitute(line, '^\s*', '\0' . symbol . ' ', '')
+            endif
+        endif
+
+        call setline(lnum, line)
+    endfor
+endfunction
+
