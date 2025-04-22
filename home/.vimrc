@@ -171,7 +171,8 @@ endif
 try
     " colorscheme zaibatsu
     " colorscheme wildcharm
-    colorscheme green
+    " colorscheme green
+    colorscheme oceanic
 catch
 endtry
 
