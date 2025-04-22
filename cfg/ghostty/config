@@ -9,7 +9,7 @@ font-style-bold = "JetBrains Mono Bold"
 font-style-italic = "JetBrains Mono Italic"
 font-style-bold-italic= "JetBrains Mono Bold Italic"
 
-font-size = 16
+font-size = 14
 
 adjust-cursor-thickness = 1
 window-decoration = false

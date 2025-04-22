@@ -169,7 +169,9 @@ if $COLORTERM == 'gnome-terminal'
 endif
 
 try
-    colorscheme zaibatsu
+    " colorscheme zaibatsu
+    " colorscheme wildcharm
+    colorscheme green
 catch
 endtry
 
@@ -562,10 +564,10 @@ augroup END
 
 
 " Normal mode: Toggle comment on current line
-nnoremap gcc :call ToggleCommentLine()<CR>
+nnoremap gc :call ToggleCommentLine()<CR>
 
 " Visual mode: Toggle comment on selected lines
-vnoremap gcc :call ToggleCommentVisual()<CR>
+vnoremap gc :call ToggleCommentVisual()<CR>
 
 function! GetCommentSymbol()
     let ft = &filetype
