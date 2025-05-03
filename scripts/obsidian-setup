@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+yay -Sy obsidian
+
+OBSIDIAN_PATH="$HOME/personal/my-second-brain"
+mkdir -p "$OBSIDIAN_PATH"
