@@ -108,7 +108,9 @@ keys = [
     Key([], "XF86AudioPlay", lazy.spawn("mpc toggle"), desc="Toggle play/pause"),
     Key([], "XF86AudioStop", lazy.spawn("mpc stop"), desc="Stop playing"),
     # Screenshots --
-    Key([], "Print", lazy.spawn(screenshot + " --now"), desc="Take Screenshot"),
+    Key([], "Print", 
+        lazy.spawn(rofi_applets + "rofi_screenshot"),
+         desc="Take Screenshot"),
     Key(
         ["control"],
         "Print",
