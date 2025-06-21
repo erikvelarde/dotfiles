@@ -80,7 +80,6 @@ nnoremap <A-j> :m+<CR>==
 nnoremap <C-S> :w!<CR>
 set noreadonly
 set noswapfile
-syntax enable
 set encoding=UTF-8
 
 " Avoid garbled characters in Chinese language windows OS
@@ -97,9 +96,9 @@ set relativenumber
 " Ignore compiled files
 set wildignore=.o,~,*.pyc
 if has("win16") || has("win32")
-    set wildignore+=.git\,.hg\,.svn\*
+  set wildignore+=.git\,.hg\,.svn\*
 else
-    set wildignore+=/.git/,/.hg/,/.svn/,*/.DS_Store
+  set wildignore+=/.git/,/.hg/,/.svn/,*/.DS_Store
 endif
 
 " Always show current position
@@ -147,7 +146,7 @@ set tm=500
 
 " Properly disable sound on errors on MacVim
 if has("gui_macvim")
-    autocmd GUIEnter * set vb t_vb=
+  autocmd GUIEnter * set vb t_vb=
 endif
 
 " Add a bit extra margin to the left
@@ -165,25 +164,25 @@ set regexpengine=0
 
 " Enable 256 colors palette in Gnome Terminal
 if $COLORTERM == 'gnome-terminal'
-    set t_Co=256
+  set t_Co=256
 endif
 
 try
-    " colorscheme zaibatsu
-    " colorscheme wildcharm
-    " colorscheme green
-    colorscheme oceanic
+  " colorscheme zaibatsu
+  " colorscheme green
+  colorscheme oceanic
 catch
+  colorscheme wildcharm
 endtry
 
 set background=dark
 
 " Set extra options when running in GUI mode
 if has("gui_running")
-    set guioptions-=T
-    set guioptions-=e
-    set t_Co=256
-    set guitablabel=%M\ %t
+  set guioptions-=T
+  set guioptions-=e
+  set t_Co=256
+  set guitablabel=%M\ %t
 endif
 
 " Set utf8 as standard encoding and en_US as the standard language
@@ -241,10 +240,10 @@ inoremap jk <Esc>
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Map <Space> to / (search) and Ctrl-<Space> to ? (backwards search)
 map <space> /
-map <C-space> ?
+  map <C-space> ?
 
-" Disable highlight when <leader><cr> is pressed
-map <silent> <leader><cr> :noh<cr>
+  " Disable highlight when <leader><cr> is pressed
+  map <silent> <leader><cr> :noh<cr>
 
 " Smart way to move between windows
 map <C-j> <C-W>j
@@ -323,15 +322,15 @@ endif
 
 " Delete trailing white space on save, useful for some filetypes ;)
 fun! CleanExtraSpaces()
-    let save_cursor = getpos(".")
-    let old_query = getreg('/')
-    silent! %s/\s\+$//e
-    call setpos('.', save_cursor)
-    call setreg('/', old_query)
+  let save_cursor = getpos(".")
+  let old_query = getreg('/')
+  silent! %s/\s\+$//e
+  call setpos('.', save_cursor)
+  call setreg('/', old_query)
 endfun
 
 if has("autocmd")
-    autocmd BufWritePre .txt,.js,.py,.wiki,.sh,.coffee :call CleanExtraSpaces()
+  autocmd BufWritePre .txt,.js,.py,.wiki,.sh,.coffee :call CleanExtraSpaces()
 endif
 
 
@@ -369,78 +368,78 @@ map <leader>pp :setlocal paste!<cr>
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Returns true if paste mode is enabled
 function! HasPaste()
-    if &paste
-        return 'PASTE MODE  '
-    endif
-    return ''
+  if &paste
+    return 'PASTE MODE  '
+  endif
+  return ''
 endfunction
 
 " Don't close window, when deleting a buffer
 command! Bclose call <SID>BufcloseCloseIt()
 function! <SID>BufcloseCloseIt()
-    let l:currentBufNum = bufnr("%")
-    let l:alternateBufNum = bufnr("#")
+  let l:currentBufNum = bufnr("%")
+  let l:alternateBufNum = bufnr("#")
 
-    if buflisted(l:alternateBufNum)
-        buffer #
-    else
-        bnext
-    endif
+  if buflisted(l:alternateBufNum)
+    buffer #
+  else
+    bnext
+  endif
 
-    if bufnr("%") == l:currentBufNum
-        new
-    endif
+  if bufnr("%") == l:currentBufNum
+    new
+  endif
 
-    if buflisted(l:currentBufNum)
-        execute("bdelete! ".l:currentBufNum)
-    endif
+  if buflisted(l:currentBufNum)
+    execute("bdelete! ".l:currentBufNum)
+  endif
 endfunction
 
 function! CmdLine(str)
-    call feedkeys(":" . a:str)
+  call feedkeys(":" . a:str)
 endfunction
 
 function! VisualSelection(direction, extra_filter) range
-    let l:saved_reg = @"
-    execute "normal! vgvy"
+  let l:saved_reg = @"
+  execute "normal! vgvy"
 
-    let l:pattern = escape(@", "\\/.*'$^~[]")
-    let l:pattern = substitute(l:pattern, "\n$", "", "")
+  let l:pattern = escape(@", "\\/.*'$^~[]")
+  let l:pattern = substitute(l:pattern, "\n$", "", "")
 
-    if a:direction == 'gv'
-        call CmdLine("Ack '" . l:pattern . "' " )
-    elseif a:direction == 'replace'
-        call CmdLine("%s" . '/'. l:pattern . '/')
-    endif
+  if a:direction == 'gv'
+    call CmdLine("Ack '" . l:pattern . "' " )
+  elseif a:direction == 'replace'
+    call CmdLine("%s" . '/'. l:pattern . '/')
+  endif
 
-    let @/ = l:pattern
-    let @" = l:saved_reg
+  let @/ = l:pattern
+  let @" = l:saved_reg
 endfunction
 
 " Change cursor shape between insert and normal mode
 if &term =~ '^xterm'
-    " Use a thin vertical bar cursor in insert mode
-    let &t_SI = "\e[5 q"
-    " Use a solid block cursor in normal mode
-    let &t_EI = "\e[2 q"
+  " Use a thin vertical bar cursor in insert mode
+  let &t_SI = "\e[5 q"
+  " Use a solid block cursor in normal mode
+  let &t_EI = "\e[2 q"
 endif
 
 " For terminal supporting DECSCUSR
 if exists('$TMUX')
-    " In TMUX, use these settings
-    let &t_SI = "\<Esc>Ptmux;\<Esc>\<Esc>[5 q\<Esc>\\"
-    let &t_EI = "\<Esc>Ptmux;\<Esc>\<Esc>[2 q\<Esc>\\"
+  " In TMUX, use these settings
+  let &t_SI = "\<Esc>Ptmux;\<Esc>\<Esc>[5 q\<Esc>\\"
+  let &t_EI = "\<Esc>Ptmux;\<Esc>\<Esc>[2 q\<Esc>\\"
 elseif &term =~ "screen"
-    " For screen/tmux compatibility
-    let &t_SI = "\<Esc>[5 q"
-    let &t_EI = "\<Esc>[2 q"
+  " For screen/tmux compatibility
+  let &t_SI = "\<Esc>[5 q"
+  let &t_EI = "\<Esc>[2 q"
 endif
 
 " ----
 " Completion popup options
 set completeopt=menuone,noinsert
 set complete=b
-
+" 
 " Trigger only after 2+ characters typed
 autocmd InsertCharPre * call AutoCompleteBuffer()
 function! AutoCompleteBuffer()
@@ -451,8 +450,6 @@ function! AutoCompleteBuffer()
 endfunction
 
 " Navigate popup with <C-j> and <C-k>
-inoremap <expr> <C-j> pumvisible() ? "\<C-n>" : "\<C-j>"
-inoremap <expr> <C-k> pumvisible() ? "\<C-p>" : "\<C-k>"
 
 " Keymaps
 " Set leader
@@ -571,8 +568,8 @@ nnoremap gc :call ToggleCommentLine()<CR>
 vnoremap gc :call ToggleCommentVisual()<CR>
 
 function! GetCommentSymbol()
-    let ft = &filetype
-    return get({
+  let ft = &filetype
+  return get({
         \ 'c': '//',
         \ 'cpp': '//',
         \ 'java': '//',
@@ -592,53 +589,95 @@ function! GetCommentSymbol()
 endfunction
 
 function! ToggleCommentLine()
-    let symbol = GetCommentSymbol()
-    let line = getline('.')
+  let symbol = GetCommentSymbol()
+  let line = getline('.')
 
-    if symbol == '<!--'
-        if line =~ '^\s*<!--'
-            let line = substitute(line, '^\s*<!--\s*', '', '')
-            let line = substitute(line, '\s*-->$', '', '')
-        else
-            let line = substitute(line, '^\s*', '\0<!-- ', '')
-            let line .= ' -->'
-        endif
+  if symbol == '<!--'
+    if line =~ '^\s*<!--'
+      let line = substitute(line, '^\s*<!--\s*', '', '')
+      let line = substitute(line, '\s*-->$', '', '')
     else
-        if line =~ '^\s*' . escape(symbol, '#/.*~')
-            let line = substitute(line, '^\(\s*\)' . escape(symbol, '#/.*~') . '\s*', '\1', '')
-        else
-            let line = substitute(line, '^\s*', '\0' . symbol . ' ', '')
-        endif
+      let line = substitute(line, '^\s*', '\0<!-- ', '')
+      let line .= ' -->'
     endif
+  else
+    if line =~ '^\s*' . escape(symbol, '#/.*~')
+      let line = substitute(line, '^\(\s*\)' . escape(symbol, '#/.*~') . '\s*', '\1', '')
+    else
+      let line = substitute(line, '^\s*', '\0' . symbol . ' ', '')
+    endif
+  endif
 
-    call setline('.', line)
+  call setline('.', line)
 endfunction
 
 function! ToggleCommentVisual()
-    let symbol = GetCommentSymbol()
-    let start = line("'<")
-    let end = line("'>")
+  let symbol = GetCommentSymbol()
+  let start = line("'<")
+  let end = line("'>")
 
-    for lnum in range(start, end)
-        let line = getline(lnum)
+  for lnum in range(start, end)
+    let line = getline(lnum)
 
-        if symbol == '<!--'
-            if line =~ '^\s*<!--'
-                let line = substitute(line, '^\s*<!--\s*', '', '')
-                let line = substitute(line, '\s*-->$', '', '')
-            else
-                let line = substitute(line, '^\s*', '\0<!-- ', '')
-                let line .= ' -->'
-            endif
-        else
-            if line =~ '^\s*' . escape(symbol, '#/.*~')
-                let line = substitute(line, '^\(\s*\)' . escape(symbol, '#/.*~') . '\s*', '\1', '')
-            else
-                let line = substitute(line, '^\s*', '\0' . symbol . ' ', '')
-            endif
-        endif
+    if symbol == '<!--'
+      if line =~ '^\s*<!--'
+        let line = substitute(line, '^\s*<!--\s*', '', '')
+        let line = substitute(line, '\s*-->$', '', '')
+      else
+        let line = substitute(line, '^\s*', '\0<!-- ', '')
+        let line .= ' -->'
+      endif
+    else
+      if line =~ '^\s*' . escape(symbol, '#/.*~')
+        let line = substitute(line, '^\(\s*\)' . escape(symbol, '#/.*~') . '\s*', '\1', '')
+      else
+        let line = substitute(line, '^\s*', '\0' . symbol . ' ', '')
+      endif
+    endif
 
-        call setline(lnum, line)
-    endfor
+    call setline(lnum, line)
+  endfor
 endfunction
 
+" Enable mouse support for navigation and resizing
+set mouse=a
+
+" Store swap and backup files in a dedicated directory
+set backup
+set writebackup
+set swapfile
+set backupdir=~/.vim/tmp/backup//,.
+set directory=~/.vim/tmp/swap//,.
+set undodir=~/.vim/tmp/undo//,.
+set undofile " Persistent undo across sessions
+if !isdirectory(expand('~/.vim/tmp/backup'))
+  call mkdir(expand('~/.vim/tmp/backup'), 'p')
+endif
+if !isdirectory(expand('~/.vim/tmp/swap'))
+  call mkdir(expand('~/.vim/tmp/swap'), 'p')
+endif
+if !isdirectory(expand('~/.vim/tmp/undo'))
+  call mkdir(expand('~/.vim/tmp/undo'), 'p')
+endif
+
+
+" Completion popup options
+"set completeopt=menuone,noinsert,noselect
+"set complete=.,w,b,u,t,i " Include buffer, window, unloaded buffers, tags, and include files
+
+" Trigger completion after 2+ characters, excluding comments
+" autocmd InsertCharPre * call AutoCompleteBuffer()
+" function! AutoCompleteBuffer()
+"  let col = col('.') - 1
+"  let line = getline('.')
+"  if col >= 2 && !pumvisible() && line !~ '^\s*\/\/\|^\s*#' " Skip in comments
+"    call feedkeys("\<C-n>", "n")
+"  endif
+"endfunction
+
+inoremap <expr> <C-j> pumvisible() ? "\<C-n>" : "\<C-j>"
+inoremap <expr> <C-k> pumvisible() ? "\<C-p>" : "\<C-k>"
+
+" Simplified status line
+set laststatus=2
+set statusline=%{HasPaste()}%f%m%r%h%w\ Line:%l\ Col:%c

@@ -8,6 +8,7 @@ end
 
 --
 require("config.languages-conf.languages.typescript")
+require("config.languages-conf.languages.glsl")
 require("config.languages-conf.languages.cmake")
 require("config.languages-conf.languages.c")
 require("config.languages-conf.languages.angular")
