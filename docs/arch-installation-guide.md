@@ -248,8 +248,19 @@ Uncomment the next line:
 mkinitcpio -P
 exit
 umount -R /mnt
+
+sudo nano /etc/grub.d/40_custom
+# Add this:
+#   menuentry "Windows 10" {
+#       set root='(hd0,1)'
+#       chainloader +1
+#   }
+
 reboot
 ````
+
+
+
 
 ## connect to internet
 
