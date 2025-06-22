@@ -25,3 +25,12 @@ require("config.languages-conf.languages.markdown")
 -- require("config.languages-conf.languages.c_sharp")
 -- require("config.languages-conf.languages.sql")
 require("config.languages-conf.languages.bash")
+
+-- formatters
+require("config.languages-conf.formatters.stylua")
+require("config.languages-conf.formatters.ast-grep")
+require("config.languages-conf.formatters.black")
+require("config.languages-conf.formatters.blade_formatter")
+require("config.languages-conf.formatters.clang_format")
+require("config.languages-conf.formatters.prettier")
+require("config.languages-conf.formatters.php_cs_fixer")

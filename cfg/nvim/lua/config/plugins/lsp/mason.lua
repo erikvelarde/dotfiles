@@ -22,7 +22,7 @@ return {
 				"html",
 				-- "cssls",
 				"emmet_ls",
-				-- "tsserver",
+        "tsserver",
 				"pyright",
 				-- "zls", -- zig
 				-- "intelephense",
