@@ -78,3 +78,9 @@ eval "$(fzf --zsh)"
 export CLANG_FORMAT_STYLE=file
 export CLANG_FORMAT_CONFIG=~/.config/nvim/clang/.clang-format
 export PATH=/home/erick/go/bin/lazygit:/home/erick/Android/Sdk/platform-tools:/home/erick/Android/Sdk/cmdline-tools/bin:/home/erick/.flutter_install/flutter/bin:/opt/vcpkg:/home/erick/.nvm/versions/node/v20.14.0/bin:/usr/condabin:/home/erick/.cargo/bin:/sbin:/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/sbin:/usr/lib/jvm/default/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl:/home/erick/.config/pycopy:/home/erick/.config/java-features:/home/erick/.config/java-craft:/home/erick/.config/pycopy:/home/erick/.config/composer/vendor/bin:/home/erick/.local/bin:/home/erick/.config/pycopy
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+export ANDROID_HOME="/opt/android-sdk"
+export PATH="$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools"
