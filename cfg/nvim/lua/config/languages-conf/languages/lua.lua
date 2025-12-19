@@ -1,37 +1,24 @@
--- -- configure lua server (with special settings)
--- lspconfig["sumneko_lua"].setup({
---   capabilities = capabilities,
---   on_attach = on_attach,
---   settings = { -- custom settings for lua
---     Lua = {
---       -- make the language server recognize "vim" global
---       diagnostics = {
---         globals = { "vim" },
---       },
---       workspace = {
---         -- make language server aware of runtime files
---         library = {
---           [vim.fn.expand("$VIMRUNTIME/lua")] = true,
---           [vim.fn.stdpath("config") .. "/lua"] = true,
---         },
---       },
---     },
---   },
--- })
--- IMPORTANT: make sure to setup neodev BEFORE lspconfig
--- require("neodev").setup({
---   -- add any options here, or leave empty to use the default settings
--- })
+-- In your lspconfig setup for lua_ls
+local runtime_path = vim.split(package.path, ";")
+table.insert(runtime_path, "lua/?.lua")
+table.insert(runtime_path, "lua/?/init.lua")
 
--- then setup your lsp server as usual
-local lspconfig = require("lspconfig")
-
--- example to setup lua_ls and enable call snippets
-lspconfig.lua_ls.setup({
+require("lspconfig").lua_ls.setup({
 	settings = {
 		Lua = {
-			completion = {
-				callSnippet = "Replace",
+			runtime = {
+				version = "LuaJIT",
+				path = runtime_path,
+			},
+			diagnostics = {
+				globals = { "vim" },
+			},
+			workspace = {
+				library = vim.api.nvim_get_runtime_file("", true),
+				checkThirdParty = false,
+			},
+			telemetry = {
+				enable = false,
 			},
 		},
 	},

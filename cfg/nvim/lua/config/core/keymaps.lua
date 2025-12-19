@@ -214,8 +214,8 @@ local function enable_focus_mode()
 	vim.opt.showtabline = 0
 	vim.opt.laststatus = 0
 
-	vim.opt.number = false
-	vim.opt.relativenumber = false
+	-- vim.opt.number = false
+	-- vim.opt.relativenumber = false
 end
 local function disable_focus_mode()
 	vim.opt.laststatus = 3
