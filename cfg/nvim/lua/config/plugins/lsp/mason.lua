@@ -22,7 +22,9 @@ return {
 				"html",
 				-- "cssls",
 				"emmet_ls",
-        "tsserver",
+				-- "tsserver",
+				-- "typescript-language-server",
+				"ts_ls",
 				"pyright",
 				-- "zls", -- zig
 				-- "intelephense",
@@ -49,10 +51,9 @@ return {
 		--     "rustfmt",
 		--     "ast_grep",
 		--   },
-    --
+		--
 		--   -- auto-install configured servers (with lspconfig)
 		--   automatic_installation = true,
 		-- })
 	end,
 }
-
