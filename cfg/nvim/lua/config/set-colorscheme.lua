@@ -1,2 +1,2 @@
-require("config.colorschemes.gruvbox")
--- require("config.colorschemes.catppuccin")
+-- require("config.colorschemes.gruvbox")
+require("config.colorschemes.catppuccin")
