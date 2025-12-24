@@ -6,16 +6,25 @@ return {
 			"nvim-tree/nvim-web-devicons",
 		},
 		config = function()
+			-- Force hide tabline from the start
+			vim.opt.showtabline = 0
+
 			require("barbar").setup({
 				animation = true,
-				auto_hide = true,
+				auto_hide = false, -- Changed to false to prevent auto-show behavior
 				tabpages = true,
 				closable = true,
 				clickable = true,
 				exclude_ft = { "qf", "fugitive" },
 				exclude_name = { "package.json" },
 				focus_on_close = "left",
-				hide = { extensions = true, inactive = false },
+				hide = {
+					extensions = true,
+					inactive = true, -- Hide inactive buffers
+					current = false, -- Show current buffer
+					alternate = false, -- Show alternate buffers
+					visible = true, -- Hide when visible in splits
+				},
 				highlight_alternate = false,
 				highlight_inactive_file_icons = false,
 				highlight_visible = true,
@@ -57,9 +66,43 @@ return {
 				no_name_title = nil,
 			})
 
+			-- Create augroup to ensure tabline stays hidden
+			local tabline_augroup = vim.api.nvim_create_augroup("BarbarTablineControl", { clear = true })
+
+			-- Hide tabline on various events that might trigger Barbar to show it
+			vim.api.nvim_create_autocmd({
+				"BufAdd",
+				"BufEnter",
+				"BufWinEnter",
+				"TabNew",
+				"TabEnter",
+				"WinEnter",
+				"VimResized",
+				"FileType",
+			}, {
+				group = tabline_augroup,
+				callback = function()
+					vim.schedule(function()
+						vim.opt.showtabline = 0
+					end)
+				end,
+			})
+
+			-- Also ensure tabline is hidden on startup
+			vim.api.nvim_create_autocmd("VimEnter", {
+				group = tabline_augroup,
+				callback = function()
+					vim.opt.showtabline = 0
+				end,
+				once = true,
+			})
+
+			-- Key mappings
 			vim.keymap.set("n", "<A-,>", "<Cmd>BufferPrevious<CR>", { noremap = true, silent = true })
 			vim.keymap.set("n", "<A-.>", "<Cmd>BufferNext<CR>", { noremap = true, silent = true })
+			vim.keymap.set("n", "<A-2", "<Cmd>BufferNext<CR>", { noremap = true, silent = true })
 			vim.keymap.set("n", "<A-<>", "<Cmd>BufferMovePrevious<CR>", { noremap = true, silent = true })
+			vim.keymap.set("n", "<A-1>", "<Cmd>BufferMovePrevious<CR>", { noremap = true, silent = true })
 			vim.keymap.set("n", "<A->>", "<Cmd>BufferMoveNext<CR>", { noremap = true, silent = true })
 			vim.keymap.set("n", "<A-1>", "<Cmd>BufferGoto 1<CR>", { noremap = true, silent = true })
 			vim.keymap.set("n", "<A-2>", "<Cmd>BufferGoto 2<CR>", { noremap = true, silent = true })
@@ -73,10 +116,23 @@ return {
 			vim.keymap.set("n", "<A-0>", "<Cmd>BufferLast<CR>", { noremap = true, silent = true })
 			vim.keymap.set("n", "<A-c>", "<Cmd>BufferClose<CR>", { noremap = true, silent = true })
 			vim.keymap.set("n", "<A-p>", "<Cmd>BufferPin<CR>", { noremap = true, silent = true })
+			vim.keymap.set("n", "<A-2>", "<Cmd>BufferMoveNext<CR>", { noremap = true, silent = true })
+			vim.keymap.set("n", "<A-1>", "<Cmd>BufferMovePrevious<CR>", { noremap = true, silent = true })
 			vim.keymap.set("n", "<leader>bb", "<Cmd>BufferOrderByBufferNumber<CR>", { noremap = true, silent = true })
 			vim.keymap.set("n", "<leader>bd", "<Cmd>BufferOrderByDirectory<CR>", { noremap = true, silent = true })
 			vim.keymap.set("n", "<leader>bl", "<Cmd>BufferOrderByLanguage<CR>", { noremap = true, silent = true })
 			vim.keymap.set("n", "<leader>bw", "<Cmd>BufferOrderByWindowNumber<CR>", { noremap = true, silent = true })
+
+			-- Optional: Add a command to toggle tabline if you ever want to see it
+			vim.api.nvim_create_user_commound("ToggleTabline", function()
+				if vim.opt.showtabline:get() == 0 then
+					vim.opt.showtabline = 2
+					vim.notify("Tabline shown", vim.log.levels.INFO)
+				else
+					vim.opt.showtabline = 0
+					vim.notify("Tabline hidden", vim.log.levels.INFO)
+				end
+			end, {})
 		end,
 	},
 }

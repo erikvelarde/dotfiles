@@ -185,8 +185,8 @@ keymap.set("n", "fy", "<cmd>Telescope neoclip a<cr>", { silent = true })
 
 -- Diagnostics
 keymap.set("n", "<leader>ld", vim.diagnostic.setloclist, { desc = "List Diagnostics in Location List" })
-keymap.set("n", "[d", vim.diagnostic.goto_prev, { desc = "Go to Previous Diagnostic" })
-keymap.set("n", "]d", vim.diagnostic.goto_next, { desc = "Go to Next Diagnostic" })
+-- keymap.set("n", "[d", vim.diagnostic.goto_prev, { desc = "Go to Previous Diagnostic" })
+-- keymap.set("n", "]d", vim.diagnostic.goto_next, { desc = "Go to Next Diagnostic" })
 keymap.set("n", "<leader>sd", "<cmd>Telescope diagnostics<CR>", { desc = "Search Diagnostics" })
 
 -- -- Harpoon
@@ -227,3 +227,8 @@ end
 
 keymap.set("n", "<leader>df", disable_focus_mode, { desc = "Enable numbers, relative numbers and bufferline" })
 keymap.set("n", "<leader>ef", enable_focus_mode, { desc = "Disable numbers, relative numbers and bufferline" })
+
+keymap.set("n", "<C-d>", "<C-d>zz")
+keymap.set("n", "<C-u>", "<C-u>zz")
+
+keymap.set("n", "<C-f>", "/")
