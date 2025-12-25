@@ -124,7 +124,7 @@ return {
 			vim.keymap.set("n", "<leader>bw", "<Cmd>BufferOrderByWindowNumber<CR>", { noremap = true, silent = true })
 
 			-- Optional: Add a command to toggle tabline if you ever want to see it
-			vim.api.nvim_create_user_commound("ToggleTabline", function()
+			vim.api.nvim_create_user_command("ToggleTabline", function()
 				if vim.opt.showtabline:get() == 0 then
 					vim.opt.showtabline = 2
 					vim.notify("Tabline shown", vim.log.levels.INFO)
