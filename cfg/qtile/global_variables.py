@@ -6,8 +6,8 @@ _home = path.expanduser("~")
 # mod = "control"
 mod = "mod4"
 
-#  terminal = "kitty"
-terminal = "ghostty"
+terminal = "kitty"
+# terminal = "ghostty"
 second_terminal = "alacritty"
 file_manager = "thunar"
 
