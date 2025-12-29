@@ -1,6 +1,6 @@
-require("config.core");
+require("config.core")
 --require("config.plugins");
-require("config.lazy");
+require("config.lazy")
 
--- setting colorsheme 
+-- setting colorsheme
 require("config.core.colorschemes.catppuccin")
