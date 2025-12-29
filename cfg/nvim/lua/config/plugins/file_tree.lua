@@ -29,6 +29,10 @@ return {
 					},
 				},
 				icons = {
+					show = {
+						git = true,
+					},
+					git_placement = "after",  -- This is the key option!
 					glyphs = {
 						default = "",
 						symlink = "",
@@ -42,6 +46,7 @@ return {
 							symlink = "",
 							symlink_open = "",
 						},
+						-- Simplified git icons for better positioning
 						git = {
 							unstaged = "M",
 							staged = "S",

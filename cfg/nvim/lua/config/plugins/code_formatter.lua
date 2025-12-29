@@ -26,5 +26,21 @@ return {
 				async = false,
 			},
 		})
+
+		-- formatters = {
+		--   -- Stylua with custom config
+		--   stylua = {
+		--     command = "stylua",
+		--     args = {
+		--       "--config-path",
+		--       vim.fn.expand("~/.config/nvim/formatters_config/stylua.toml"), -- Global config
+		--       "-",
+		--     },
+		--     condition = function(ctx)
+		--       -- Only format if stylua exists
+		--       return vim.fn.executable("stylua") == 1
+		--     end,
+		--   },
+		-- }
 	end,
 }
