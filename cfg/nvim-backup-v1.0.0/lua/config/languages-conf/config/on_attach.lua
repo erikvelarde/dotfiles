@@ -1,0 +1,63 @@
+-- local keymap = vim.keymap
+--
+-- local M = {} -- Module table to export
+--
+-- -- Define on_attach function
+-- M.on_attach = function(client, bufnr)
+--   -- keybind options
+--   local opts = { noremap = true, silent = true, buffer = bufnr }
+--
+--   -- Enable completion triggered by <c-x><c-o>
+--   vim.api.nvim_buf_set_option(bufnr, "omnifunc", "v:lua.vim.lsp.omnifunc")
+--
+--   -- Mappings.
+--   -- See `:help vim.lsp.*` for documentation on any of the below functions
+--   keymap.set("n", "gD", vim.lsp.buf.declaration, opts)
+--   keymap.set("n", "gd", vim.lsp.buf.definition, opts)
+--   keymap.set("n", "K", vim.lsp.buf.hover, opts)
+--   keymap.set("n", "gi", vim.lsp.buf.implementation, opts)
+--   keymap.set("n", "<C-k>", vim.lsp.buf.signature_help, opts)
+--   keymap.set("n", "<leader>wa", vim.lsp.buf.add_workspace_folder, opts)
+--   keymap.set("n", "<leader>wr", vim.lsp.buf.remove_workspace_folder, opts)
+--   keymap.set("n", "<leader>wl", function()
+--     print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
+--   end, opts)
+--   keymap.set("n", "<leader>D", vim.lsp.buf.type_definition, opts)
+--   keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts)
+--   keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, opts)
+--   keymap.set("n", "gr", vim.lsp.buf.references, opts)
+--   keymap.set("n", "<leader>f", function()
+--     vim.lsp.buf.format({ async = true })
+--   end, opts)
+--
+--   -- Diagnostic keymaps
+--   keymap.set("n", "[d", vim.diagnostic.goto_prev, opts)
+--   keymap.set("n", "]d", vim.diagnostic.goto_next, opts)
+--   keymap.set("n", "<leader>e", vim.diagnostic.open_float, opts)
+--   keymap.set("n", "<leader>q", vim.diagnostic.setloclist, opts)
+-- end
+--
+-- -- LSP flags
+-- M.lsp_flags = {
+--   debounce_text_changes = 150,
+-- }
+--
+-- -- Capabilities
+-- local cmp_nvim_lsp_status, cmp_nvim_lsp = pcall(require, "cmp_nvim_lsp")
+-- if cmp_nvim_lsp_status then
+--   M.capabilities = cmp_nvim_lsp.default_capabilities()
+-- else
+--   M.capabilities = vim.lsp.protocol.make_client_capabilities()
+--   print("cmp_nvim_lsp not found, using default capabilities")
+-- end
+--
+-- -- Optional: Keep lspconfig reference if you need it elsewhere
+-- local lspconfig_status, lspconfig = pcall(require, "lspconfig")
+-- if lspconfig_status then
+--   M.lspconfig = lspconfig
+-- end
+--
+-- -- Optional: Keep util reference if you need it
+-- M.util = require("lspconfig.util")
+--
+-- return M -- Export the module
