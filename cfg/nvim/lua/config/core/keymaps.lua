@@ -140,10 +140,10 @@ keymap.set("n", "<leader>sh", "<C-w>s", { silent = true }) -- split window horiz
 keymap.set("n", "<leader>se", "<C-w>=", { silent = true }) -- make split windows equal width & height
 keymap.set("n", "<leader>sx", ":close<CR>", { silent = true }) -- close current split window
 -- rezize windows
-keymap.set("n", "f>", ":vertical resize +10 <CR>==", { silent = true })
-keymap.set("n", "f<", ":vertical resize -10 <CR>==", { silent = true })
-keymap.set("n", "g>", ":horizontal resize +3 <CR>==", { silent = true })
-keymap.set("n", "g<", ":horizontal resize -3 <CR>==", { silent = true })
+keymap.set("n", "<leader>.", ":vertical resize +9 <CR>==", { silent = true })
+keymap.set("n", "<leader>,", ":vertical resize -10 <CR>==", { silent = true })
+keymap.set("n", "<leader>>", ":horizontal resize +3 <CR>==", { silent = true })
+keymap.set("n", "<leader><", ":horizontal resize -3 <CR>==", { silent = true })
 -- alternatives
 keymap.set("n", "<A-i>", "<cmd>vertical resize +10 <CR>==", { silent = true })
 keymap.set("n", "<A-s>", "<cmd>vertical resize -10 <CR>==", { silent = true })
@@ -231,4 +231,43 @@ keymap.set("n", "<leader>ef", enable_focus_mode, { desc = "Disable numbers, rela
 keymap.set("n", "<C-d>", "<C-d>zz")
 keymap.set("n", "<C-u>", "<C-u>zz")
 
-keymap.set("n", "<C-f>", "/")
+-- keymap.set("n", "<C-f>", "/")
+--
+keymap.set("n", "<leader>wm", function()
+	if vim.g.window_maximized then
+		-- Restore
+		if vim.g.original_width and vim.g.original_height then
+			vim.cmd("resize " .. vim.g.original_height)
+			vim.cmd("vertical resize " .. vim.g.original_width)
+		end
+		vim.g.window_maximized = false
+	else
+		-- Maximize
+		vim.g.original_width = vim.fn.winwidth(0)
+		vim.g.original_height = vim.fn.winheight(0)
+		vim.cmd("resize 999")
+		vim.cmd("vertical resize 999")
+		vim.g.window_maximized = true
+	end
+end, { desc = "Toggle maximize window" })
+
+vim.keymap.set("n", "<leader>=", "<C-w>=", { desc = "Equalize split sizes" })
+
+-- Rotate windows clockwise
+vim.keymap.set("n", "<leader>wrc", "<C-w>r", { desc = "Rotate windows clockwise" })
+
+-- Rotate windows counter-clockwise
+vim.keymap.set("n", "<leader>wrr", "<C-w>R", { desc = "Rotate windows counter-clockwise" })
+
+-- Exchange windows
+vim.keymap.set("n", "<leader>wrx", "<C-w>x", { desc = "Exchange windows" })
+
+-- Move window to new tab
+vim.keymap.set("n", "<leader>wrt", "<C-w>T", { desc = "Move window to new tab" })
+
+-- Convert horizontal to vertical
+vim.keymap.set("n", "<leader>wvh", "<C-w>t<C-w>H", { desc = "Convert horizontal to vertical" })
+
+vim.keymap.set("n", "<leader>whv", "<C-w>t<C-w>K", { desc = "Convert vertical to horizontal" })
+-- Convert vertical to horizontal
+vim.keymap.set("n", "<leader>whv", "<C-w>t<C-w>K", { desc = "Convert vertical to horizontal" })
