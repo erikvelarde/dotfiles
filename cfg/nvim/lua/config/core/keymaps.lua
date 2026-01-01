@@ -210,23 +210,57 @@ keymap.set("v", "d$", '"_d$', { noremap = true, silent = true })
 keymap.set("n", "c", '"_c', { noremap = true, silent = true })
 keymap.set("v", "c", '"_c', { noremap = true, silent = true })
 
-local function enable_focus_mode()
-	vim.opt.showtabline = 0
-	vim.opt.laststatus = 0
+local function toggle_focus_mode()
+	if vim.opt.laststatus:get() == 0 then
+		-- Exit focus mode
+		vim.opt.laststatus = 3
+		vim.opt.showtabline = 2
+		vim.opt.number = true
+		vim.opt.relativenumber = true
+		vim.opt.signcolumn = "auto"
+		vim.opt.cmdheight = 1
+	else
+		-- Enter ULTRA focus mode
+		vim.opt.laststatus = 0
+		vim.opt.showtabline = 0
+		vim.opt.number = true
+		vim.opt.relativenumber = true
+		vim.opt.signcolumn = "no"
+		vim.opt.cmdheight = 0
+		vim.opt.ruler = false
+		vim.opt.showmode = false
+		vim.opt.numberwidth = 1
+		vim.opt.foldcolumn = "0"
 
-	-- vim.opt.number = false
-	-- vim.opt.relativenumber = false
+		-- Hide everything possible
+		vim.cmd("set noshowmode noruler")
+		-- vim.cmd("set nonumber norelativenumber noshowmode noruler")
+		vim.cmd("set signcolumn=no foldcolumn=0")
+		vim.cmd("set colorcolumn=")
+
+		-- Clear any custom highlights that add borders
+		vim.api.nvim_set_hl(0, "WinSeparator", { fg = "NONE", bg = "NONE" })
+	end
 end
-local function disable_focus_mode()
-	vim.opt.laststatus = 3
 
-	vim.opt.showtabline = 2
-	vim.opt.number = true
-	vim.opt.relativenumber = true
-end
-
-keymap.set("n", "<leader>df", disable_focus_mode, { desc = "Enable numbers, relative numbers and bufferline" })
-keymap.set("n", "<leader>ef", enable_focus_mode, { desc = "Disable numbers, relative numbers and bufferline" })
+keymap.set("n", "<leader>z", toggle_focus_mode, { desc = "Zen mode" })
+-- local function enable_focus_mode()
+--   vim.opt.showtabline = 0
+--   vim.opt.laststatus = 0
+--
+--   -- vim.opt.number = false
+--   -- vim.opt.relativenumber = false
+-- end
+-- local function disable_focus_mode()
+--   vim.opt.laststatus = 3
+--
+--   vim.opt.showtabline = 2
+--   vim.opt.number = true
+--   vim.opt.relativenumber = true
+-- end
+--
+-- keymap.set("n", "<leader>df", disable_focus_mode, { desc = "Enable numbers, relative numbers and bufferline" })
+-- keymap.set("n", "<leader>ef", enable_focus_mode, { desc = "Disable numbers, relative numbers and bufferline" })
 
 keymap.set("n", "<C-d>", "<C-d>zz")
 keymap.set("n", "<C-u>", "<C-u>zz")

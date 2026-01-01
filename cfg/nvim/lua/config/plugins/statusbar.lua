@@ -4,75 +4,81 @@ return {
 	config = function()
 		require("lualine").setup({
 			options = {
-				icons_enabled = true,
 				theme = "auto",
-				component_separators = { left = "", right = "" },
-				section_separators = { left = "", right = "" },
-				disabled_filetypes = {
-					statusline = {},
-					winbar = {},
-				},
-				ignore_focus = {},
-				always_divide_middle = true,
+				component_separators = { left = "", right = "" },
+				section_separators = { left = "", right = "" }, -- Nerd font triangles as section separators
 				globalstatus = true,
-				refresh = {
-					statusline = 1000,
-					tabline = 1000,
-					winbar = 1000,
-				},
+				refresh = { statusline = 1000 },
 			},
 			sections = {
-				lualine_a = { "mode" },
+				lualine_a = {
+					{
+						"mode",
+						fmt = function(str)
+							-- Single letter mode indicators
+							local mode_letters = {
+								n = "N",
+								i = "I",
+								v = "V",
+								V = "V",
+								[""] = "V",
+								c = "C",
+								r = "R",
+								s = "S",
+								t = "T",
+							}
+							return mode_letters[str] or str:sub(1, 1):upper()
+						end,
+						padding = { left = 1, right = 1 },
+						color = function()
+							-- Color-coded mode indicators
+							local mode_colors = {
+								n = { fg = "#000000", bg = "#7aa2f7", gui = "bold" }, -- Blue
+								i = { fg = "#000000", bg = "#73daca", gui = "bold" }, -- Teal
+								v = { fg = "#000000", bg = "#bb9af7", gui = "bold" }, -- Purple
+								c = { fg = "#000000", bg = "#e0af68", gui = "bold" }, -- Yellow
+								r = { fg = "#000000", bg = "#f7768e", gui = "bold" }, -- Red
+							}
+							return mode_colors[vim.fn.mode()] or { fg = "#ffffff", bg = "#444444", gui = "bold" }
+						end,
+					},
+				},
 				lualine_b = {
 					{
 						"branch",
-						icon = "",
-						color = { gui = "bold" },
-					},
-					{
-						"diff",
-						symbols = { added = " ", modified = " ", removed = " " },
-					},
-					{
-						"diagnostics",
-						symbols = { error = " ", warn = " ", info = " ", hint = " " },
+						icon = "",
+						color = { fg = "#bb9af7" },
+						padding = { left = 1, right = 1 },
 					},
 				},
 				lualine_c = {
 					{
 						"filename",
+						path = 1, -- Relative path (shows parent folder)
 						symbols = {
 							modified = " ●",
 							readonly = " ",
 							unnamed = "[No Name]",
 						},
+						padding = { left = 1, right = 1 },
 					},
 				},
-				lualine_x = {
-					{
-						"encoding",
-						fmt = string.upper,
-						color = { gui = "bold" },
-					},
-					{
-						"fileformat",
-						symbols = {
-							unix = "",
-							dos = "",
-							mac = "",
-						},
-					},
+				lualine_x = {},
+				lualine_y = {
 					{
 						"filetype",
-						icon_only = false,
-						colored = true,
+						icon_only = true,
+						padding = { left = 1, right = 1 },
 					},
 				},
-				lualine_y = { "progress" },
 				lualine_z = {
 					{
 						"location",
 						icon = "",
+						padding = { left = 1, right = 1 },
+						fmt = function()
+							return string.format("%d:%d", vim.fn.line("."), vim.fn.col("."))
+						end,
 					},
 				},
 			},
@@ -80,14 +86,10 @@ return {
 				lualine_a = {},
 				lualine_b = {},
 				lualine_c = { "filename" },
-				lualine_x = { "location" },
+				lualine_x = {},
 				lualine_y = {},
 				lualine_z = {},
 			},
-			tabline = {},
-			winbar = {},
-			inactive_winbar = {},
-			extensions = {},
 		})
 	end,
 }

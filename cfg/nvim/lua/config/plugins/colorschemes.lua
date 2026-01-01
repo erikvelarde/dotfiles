@@ -1,5 +1,14 @@
 return {
 	{ "ellisonleao/gruvbox.nvim", priority = 1000, config = true },
+	{ "datsfilipe/vesper.nvim" },
+	{ "shaunsingh/nord.nvim" },
+
+	{
+		"AlexvZyl/nordic.nvim",
+		lazy = false,
+		priority = 1000,
+	},
+	{ "Everblush/nvim", name = "everblush" },
 
 	{
 
@@ -60,4 +69,3 @@ return {
 	--   opts = {},
 	-- },
 }
-
