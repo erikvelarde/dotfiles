@@ -1,0 +1,52 @@
+#!/bin/bash
+
+# Ensure transparency by omitting bg colors
+export FZF_DEFAULT_OPTS="
+  --height 80% --layout=reverse --border=rounded --margin=5%
+  --prompt='󰖯 ' --header='󱂬 WINDOWS' --info=inline
+  --color=fg:#f8f8f2,hl:#bd93f9
+  --color=fg+:#f8f8f2,hl+:#ff79c6
+  --color=info:#6272a4,prompt:#50fa7b,pointer:#ff79c6
+  --color=marker:#ff79c6,spinner:#ffb86c,header:#6272a4
+"
+
+# 1. Get windows for the CURRENT session only
+# Format: "Index: Name (Active/Last)"
+windows=$(tmux list-windows -F "#I: #W #{?window_active,(active),#{?window_last_flag,(last),}}" 2>/dev/null)
+
+if [[ -z "$windows" ]]; then
+    exit 1
+fi
+
+# 2. Run FZF
+result=$(echo "$windows" | fzf-tmux -p 80%,60% -- \
+    --header-first \
+    --bind 'ctrl-j:down,ctrl-k:up' \
+    --preview 'tmux list-panes -t {1%:} -F "  󰖯 Pane #P: #T" 2>/dev/null' \
+    --preview-window 'right:60%:border-left' \
+    --expect=ctrl-x)
+
+key=$(head -1 <<< "$result")
+selected=$(tail -1 <<< "$result")
+
+# Exit if no selection
+if [[ -z "$selected" ]]; then
+    exit 0
+fi
+
+# Extract the window index (the number before the colon)
+window_index=$(echo "$selected" | cut -d: -f1)
+
+# 3. Handle Deletion (Ctrl-x)
+if [[ "$key" == "ctrl-x" ]]; then
+    echo -e "\n\033[1;31m󰖭 Kill window '$selected'? (y/n)\033[0m"
+    read -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        tmux kill-window -t "$window_index"
+    fi
+    exit 0
+fi
+
+# 4. Switch to the selected window
+tmux select-window -t "$window_index"

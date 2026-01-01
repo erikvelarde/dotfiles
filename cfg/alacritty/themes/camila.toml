@@ -1,0 +1,36 @@
+[colors.primary]
+background = '#000000' # Pure black
+foreground = '#fefefe'
+
+# ... rest of the file stays the same
+[colors.cursor]
+text = '#000000'
+cursor = '#d6d2c8'
+
+[colors.selection]
+text = 'CellForeground'
+background = '#454545'
+
+[colors.search]
+matches = { foreground = '#fefefe', background = '#5f5958' }
+focused_match = { foreground = '#000000', background = '#fffedb' }
+
+[colors.normal]
+black   = '#1c1c1c'
+red     = '#c34143'
+green   = '#a2a970'
+yellow  = '#e3d896'
+blue    = '#8b9698'
+magenta = '#aa9aac'
+cyan    = '#c1c88d'
+white   = '#cccccc'
+
+[colors.bright]
+black   = '#6f7b68'
+red     = '#c34143'
+green   = '#a2a970'
+yellow  = '#fffedb'
+blue    = '#8b9698'
+magenta = '#aa9aac'
+cyan    = '#c1c88d'
+white   = '#fefefe'

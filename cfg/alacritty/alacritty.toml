@@ -1,49 +1,30 @@
-# Colors (Gotham)
-
-# Default colors
-[colors.primary]
-background = '#0a0f14'
-foreground = '#98d1ce'
-
-# Normal colors
-[colors.normal]
-black = '#0a0f14'
-red = '#c33027'
-green = '#26a98b'
-yellow = '#edb54b'
-blue = '#195465'
-magenta = '#4e5165'
-cyan = '#33859d'
-white = '#98d1ce'
-
-# Bright colors
-[colors.bright]
-# black = '#10151b'
-black = '#888ba5'
-red = '#d26939'
-green = '#081f2d'
-yellow = '#245361'
-blue = '#093748'
-magenta = '#888ba5'
-cyan = '#599caa'
-white = '#d3ebe9'
-[font]
-size = 12
-
-[font.bold]
-family = "JetBrainsMono"
-style="Bold"
-
-[font.italic]
-family = "JetBrainsMono"
-style="Italic"
-
-[font.normal]
-family = "JetBrainsMono"
-style = "Regular"
+[general]
+import = [
+    "~/.config/alacritty/themes/camila.toml"
+]
 
 [window]
-opacity=0.5
+padding = { x = 0, y = 0 }
+opacity = 1.0
+blur = false
 
-[window.padding]
-x = 2
+
+
+[font]
+size = 15.0
+# normal = { family = "JetBrainsMonoNL Nerd Font", style = "Regular" }
+normal = { family = "Iosevka Nerd Font Mono", style = "Regular" }
+# normal = { family = "Iosevka Nerd Font Propo", style = "Regular" }
+
+[cursor]
+style = { shape = "Beam", blinking = "Always" }
+
+[[keyboard.bindings]]
+key = "V"
+mods = "Control"
+action = "Paste"
+
+# [[keyboard.bindings]]
+# key = "C"
+# mods = "Control"
+# action = "Copy"

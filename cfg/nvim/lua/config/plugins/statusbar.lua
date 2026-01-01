@@ -2,20 +2,29 @@ return {
 	"nvim-lualine/lualine.nvim",
 	dependencies = { "nvim-tree/nvim-web-devicons" },
 	config = function()
+		-- Add this BEFORE lualine setup
+		vim.opt.laststatus = 3 -- Global statusline (removes padding between windows)
+		vim.opt.showmode = false -- Don't show mode in command line (redundant with lualine)
+		vim.opt.cmdheight = 0 -- Minimal command line (hides when not in use)
+
+		-- OR use cmdheight = 1 if you prefer to always see command line
+		-- vim.opt.cmdheight = 1
+
 		require("lualine").setup({
 			options = {
 				theme = "auto",
 				component_separators = { left = "", right = "" },
-				section_separators = { left = "", right = "" }, -- Nerd font triangles as section separators
-				globalstatus = true,
+				section_separators = { left = "", right = "" },
+				globalstatus = true, -- Keep this true (single statusline)
 				refresh = { statusline = 1000 },
+				-- Optional: disable padding in sections
+				disabled_filetypes = { statusline = { "dashboard", "alpha" } },
 			},
 			sections = {
 				lualine_a = {
 					{
 						"mode",
 						fmt = function(str)
-							-- Single letter mode indicators
 							local mode_letters = {
 								n = "N",
 								i = "I",
@@ -31,13 +40,12 @@ return {
 						end,
 						padding = { left = 1, right = 1 },
 						color = function()
-							-- Color-coded mode indicators
 							local mode_colors = {
-								n = { fg = "#000000", bg = "#7aa2f7", gui = "bold" }, -- Blue
-								i = { fg = "#000000", bg = "#73daca", gui = "bold" }, -- Teal
-								v = { fg = "#000000", bg = "#bb9af7", gui = "bold" }, -- Purple
-								c = { fg = "#000000", bg = "#e0af68", gui = "bold" }, -- Yellow
-								r = { fg = "#000000", bg = "#f7768e", gui = "bold" }, -- Red
+								n = { fg = "#000000", bg = "#7aa2f7", gui = "bold" },
+								i = { fg = "#000000", bg = "#73daca", gui = "bold" },
+								v = { fg = "#000000", bg = "#bb9af7", gui = "bold" },
+								c = { fg = "#000000", bg = "#e0af68", gui = "bold" },
+								r = { fg = "#000000", bg = "#f7768e", gui = "bold" },
 							}
 							return mode_colors[vim.fn.mode()] or { fg = "#ffffff", bg = "#444444", gui = "bold" }
 						end,
@@ -54,7 +62,7 @@ return {
 				lualine_c = {
 					{
 						"filename",
-						path = 1, -- Relative path (shows parent folder)
+						path = 1,
 						symbols = {
 							modified = " ●",
 							readonly = " ",

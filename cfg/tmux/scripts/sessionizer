@@ -1,0 +1,50 @@
+#!/bin/bash
+
+export FZF_DEFAULT_OPTS="
+  --height 80% --layout=reverse --border=rounded --margin=5%
+  --prompt='󰌆  ' --header='󱂬 TMUX SESSIONS' --info=inline
+  --color=fg:#f8f8f2,hl:#bd93f9
+  --color=fg+:#f8f8f2,hl+:#ff79c6
+  --color=info:#6272a4,prompt:#50fa7b,pointer:#ff79c6
+  --color=marker:#ff79c6,spinner:#ffb86c,header:#6272a4
+"
+
+sessions=$(tmux list-sessions -F "#S" 2>/dev/null)
+
+if [[ -z "$sessions" ]]; then
+    echo "󰚌 No active tmux sessions."
+    exit 1
+fi
+
+result=$(echo "$sessions" | fzf-tmux -p 80%,60% -- \
+    --header-first \
+    --bind 'ctrl-j:down,ctrl-k:up' \
+    --preview 'tmux list-windows -t {} -F "  󰖯 #W (#{window_panes} panes)" 2>/dev/null' \
+    --preview-window 'right,60%,border-left' \
+    --expect=ctrl-x)
+
+key=$(head -1 <<< "$result")
+selected=$(tail -1 <<< "$result")
+
+if [[ -z "$selected" ]]; then
+    exit 0
+fi
+
+if [[ "$key" == "ctrl-x" ]]; then
+    # Simple terminal prompt for confirmation
+    echo -e "\n\033[1;31m󱓼 Kill session '$selected'? (y/n)\033[0m"
+    read -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        tmux kill-session -t "$selected"
+        echo "✓ Session terminated."
+        sleep 0.5
+    fi
+    exit 0
+fi
+
+if [[ -z "$TMUX" ]]; then
+    tmux attach-session -t "$selected"
+else
+    tmux switch-client -t "$selected"
+fi
