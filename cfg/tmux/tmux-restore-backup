@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+
+WINDOWS_FILE="$HOME/.tmux/windows-structure"
+
+if [ ! -f "$WINDOWS_FILE" ]; then
+  echo "No saved tmux session found"
+  exit 1
+fi
+
+echo "Restoring tmux session structure..."
+
+# Start server if needed
+if ! tmux info &>/dev/null; then
+  echo "Starting tmux server..."
+  tmux start-server
+  sleep 1
+fi
+
+# Keep track of which sessions we've created
+declare -A created_sessions
+
+# Read each line from the saved file
+while IFS=: read -r session win_index win_name layout; do
+  echo "Processing: $session - window $win_index ($win_name)"
+  
+  # Check if session exists
+  if [ -z "${created_sessions[$session]}" ]; then
+    # First time seeing this session
+    if ! tmux has-session -t "$session" 2>/dev/null; then
+      # Create session with first window
+      echo "  Creating session: $session"
+      tmux new-session -d -s "$session" -n "$win_name"
+      created_sessions["$session"]=1
+      
+      # Apply layout to window 0 (the default window)
+      tmux select-layout -t "$session:0" "$layout" 2>/dev/null || true
+    else
+      # Session already exists (maybe from previous restore attempt)
+      created_sessions["$session"]=1
+      # Rename window 0 if it exists
+      tmux rename-window -t "$session:0" "$win_name" 2>/dev/null || true
+    fi
+  else
+    # Session already created, add new window
+    if ! tmux list-windows -t "$session" -F "#{window_index}" | grep -qx "$win_index"; then
+      echo "  Adding window $win_index to session: $session"
+      tmux new-window -t "$session" -n "$win_name"
+      
+      # Move to correct index if needed
+      if [ "$win_index" != "0" ]; then
+        # Get the last window index (the one we just created)
+        last_index=$(tmux list-windows -t "$session" -F "#{window_index}" | tail -1)
+        if [ "$last_index" != "$win_index" ]; then
+          tmux move-window -s "$session:$last_index" -t "$session:$win_index" 2>/dev/null || true
+        fi
+      fi
+      
+      # Apply layout
+      tmux select-layout -t "$session:$win_index" "$layout" 2>/dev/null || true
+    fi
+  fi
+done < "$WINDOWS_FILE"
+
+echo "✓ Tmux session structure restored!"
+echo ""
+echo "Available sessions:"
+tmux ls

@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+mkdir -p ~/.tmux
+
+# Check if tmux server is running
+if ! tmux info &>/dev/null; then
+  echo "No tmux server running - nothing to save"
+  exit 0
+fi
+
+echo "Saving tmux session structure..."
+
+# Save windows with names and layouts (ignore pane content)
+tmux list-windows -a -F \
+"#{session_name}:#{window_index}:#{window_name}:#{window_layout}" \
+> ~/.tmux/windows-structure
+
+echo "✓ Saved to ~/.tmux/windows-structure"
+echo "Content:"
+cat ~/.tmux/windows-structure
