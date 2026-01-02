@@ -24,12 +24,12 @@ return {
 
 			window = {
 				completion = {
-					border = "single",
+					border = "rounded",
 					winhighlight = "Normal:Normal,FloatBorder:FloatBorder,CursorLine:Visual",
 					scrollbar = false,
 				},
 				documentation = {
-					border = "single",
+					border = "rounded",
 					max_width = 60,
 					max_height = 15,
 					winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
@@ -38,8 +38,8 @@ return {
 			},
 
 			mapping = cmp.mapping.preset.insert({
-				["<C-j>"] = cmp.mapping.select_prev_item(),
-				["<C-k>"] = cmp.mapping.select_next_item(),
+				["<C-k>"] = cmp.mapping.select_prev_item(), -- Changed from <C-k>
+				["<C-j>"] = cmp.mapping.select_next_item(), -- Changed from <C-j>
 				["<C-b>"] = cmp.mapping.scroll_docs(-4),
 				["<C-f>"] = cmp.mapping.scroll_docs(4),
 				["<C-Space>"] = cmp.mapping.complete(),
@@ -50,6 +50,15 @@ return {
 						cmp.select_next_item()
 					elseif luasnip.expand_or_jumpable() then
 						luasnip.expand_or_jump()
+					else
+						fallback()
+					end
+				end, { "i", "s" }),
+				["<S-Tab>"] = cmp.mapping(function(fallback)
+					if cmp.visible() then
+						cmp.select_prev_item()
+					elseif luasnip.jumpable(-1) then
+						luasnip.jump(-1)
 					else
 						fallback()
 					end
@@ -68,64 +77,67 @@ return {
 				{ name = "path" },
 			}),
 
-			-- NEW: Name on left, category on right
 			formatting = {
-				fields = { "abbr", "kind" }, -- Changed order: abbr first, then kind
+				fields = { "kind", "abbr", "menu" },
 				format = function(entry, vim_item)
-					-- Clean category names for the right side
-					local category_names = {
-						Text = "text",
-						Method = "function",
-						Function = "function",
-						Constructor = "new",
-						Field = "field",
-						Variable = "variable",
-						Class = "class",
-						Interface = "interface",
-						Module = "module",
-						Property = "property",
-						Unit = "unit",
-						Value = "value",
-						Enum = "enum",
-						Keyword = "keyword",
-						Snippet = "snippet",
-						Color = "color",
-						File = "file",
-						Reference = "reference",
-						Folder = "folder",
-						EnumMember = "enum",
-						Constant = "constant",
-						Struct = "struct",
-						Event = "event",
-						Operator = "operator",
-						TypeParameter = "type",
+					-- Icons instead of category names
+					local kind_icons = {
+						Text = "󰉿",
+						Method = "󰆧",
+						Function = "󰊕",
+						Constructor = "",
+						Field = "󰜢",
+						Variable = "󰀫",
+						Class = "󰠱",
+						Interface = "",
+						Module = "",
+						Property = "󰜢",
+						Unit = "󰑭",
+						Value = "󰎠",
+						Enum = "",
+						Keyword = "󰌋",
+						Snippet = "",
+						Color = "󰏘",
+						File = "󰈙",
+						Reference = "󰈇",
+						Folder = "󰉋",
+						EnumMember = "",
+						Constant = "󰏿",
+						Struct = "󰙅",
+						Event = "",
+						Operator = "󰆕",
+						TypeParameter = "",
 					}
 
-					-- Put category on the right side
-					vim_item.kind = string.format(" %s", category_names[vim_item.kind] or vim_item.kind)
+					-- Set icon
+					vim_item.kind = string.format("%s", kind_icons[vim_item.kind] or "󰗇")
 
-					-- Source indicator (optional, very subtle)
-					if false then -- Set to true if you want source hint
-						local source_hint = {
-							nvim_lsp = "LSP",
-							luasnip = "snip",
-							buffer = "buf",
-							path = "path",
-						}
-						vim_item.menu = string.format("[%s]", source_hint[entry.source.name] or "")
+					-- Optional source hint (very subtle)
+					local source_hint = {
+						nvim_lsp = "",
+						luasnip = "󰨭",
+						buffer = "󰧮",
+						path = "󰉋",
+					}
+					vim_item.menu = source_hint[entry.source.name] or ""
+
+					-- Optional: Show source name only for certain types
+					if entry.source.name == "nvim_lsp" then
+						local item = entry:get_completion_item()
+						if item.detail then
+							vim_item.menu = item.detail
+						end
 					end
 
 					return vim_item
 				end,
 			},
 
-			-- Clean layout settings
 			experimental = {
 				ghost_text = false,
 				native_menu = false,
 			},
 
-			-- Better sorting to prioritize names
 			sorting = {
 				priority_weight = 2.0,
 				comparators = {
@@ -141,52 +153,46 @@ return {
 				},
 			},
 
-			-- Better item layout
 			view = {
 				entries = { name = "custom", selection_order = "near_cursor" },
 			},
 
 			window = {
 				completion = {
-					border = "single",
+					border = "rounded",
 					winhighlight = "Normal:Normal,FloatBorder:FloatBorder,CursorLine:Visual",
 					scrollbar = false,
-					-- Limit width to prevent overflow
 					max_width = 50,
 				},
 				documentation = {
-					border = "single",
-					-- Position docs to the right
+					border = "rounded",
 					side = "right",
 					max_width = 60,
 					max_height = 15,
 					winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
 				},
 			},
-
-			-- Enable scrolling in docs
-			view = {
-				entries = { name = "custom", selection_order = "near_cursor" },
-				docs = {
-					auto_open = true, -- Auto-open docs for selected item
-				},
-			},
 		})
 
-		-- Custom highlights for the new layout
+		-- Custom highlights for minimalist look
 		vim.api.nvim_set_hl(0, "FloatBorder", { fg = "#444444", bg = "NONE" })
 		vim.api.nvim_set_hl(0, "NormalFloat", { bg = "NONE" })
 		vim.api.nvim_set_hl(0, "Pmenu", { bg = "NONE" })
 
-		-- Name on left (normal text)
+		-- Main completion text
 		vim.api.nvim_set_hl(0, "CmpItemAbbr", { fg = "#c0caf5" })
 		vim.api.nvim_set_hl(0, "CmpItemAbbrMatch", { fg = "#7aa2f7", bold = true })
+		vim.api.nvim_set_hl(0, "CmpItemAbbrMatchFuzzy", { fg = "#7aa2f7", bold = true })
 
-		-- Category on right (subtle, muted)
-		vim.api.nvim_set_hl(0, "CmpItemKind", { fg = "#565f89", italic = true })
+		-- Icons (subtle color)
+		vim.api.nvim_set_hl(0, "CmpItemKind", { fg = "#bb9af7" })
+
+		-- Source hints (very subtle)
+		vim.api.nvim_set_hl(0, "CmpItemMenu", { fg = "#565f89", italic = true })
 
 		-- Selection
 		vim.api.nvim_set_hl(0, "PmenuSel", { bg = "#2d3045" })
+		vim.api.nvim_set_hl(0, "CmpItemAbbrSelected", { fg = "#ffffff", bold = true })
 	end,
 }
 

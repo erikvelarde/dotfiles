@@ -11,7 +11,7 @@ return {
 
       let g:NERDAltDelims_java = 1
 
-      let g:NERDCustomDelimiters = { 'c': { 'left': '/**','right': '*/' } }
+      "let g:NERDCustomDelimiters = { 'c': { 'left': '/**','right': '*/' } }
       let g:NERDCommentEmptyLines = 1
 
       let g:NERDTrimTrailingWhitespace = 1
