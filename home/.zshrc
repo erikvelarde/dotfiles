@@ -36,6 +36,8 @@ export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --bind='ctrl-o:execute(vim {})+abort'
 
 alias nv="nvim \$(fzf)"
 alias n="nvim ."
+alias trestore="$HOME/.dotfiles/cfg/tmux/scripts/tmux-restore"
+alias tdelete="$HOME/.dotfiles/cfg/tmux/scripts/tmux-delete"
 # alias ls="eza"
 export PATH=/home/erick/.nvm/versions/node/v18.16.1/bin:/usr/condabin:/home/erick/.cargo/bin:/sbin:/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/sbin:/usr/lib/jvm/default/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl:/home/erick/.config/pycopy:/home/erick/.config/java-features:/home/erick/.config/java-craft:/home/erick/.config/pycopy
 

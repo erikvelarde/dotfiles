@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+# tmux-delete: Delete tmux sessions and update backup
+
+SESSION="${1}"
+BACKUP_FILE="$HOME/.tmux/session-structure"
+TEMP_FILE="$HOME/.tmux/session-structure.tmp"
+
+if [ -z "$SESSION" ]; then
+  echo "Usage: tmux-delete <session-name>"
+  echo ""
+  echo "Available sessions:"
+  if tmux info &>/dev/null; then
+    tmux ls
+  else
+    echo "  (tmux server not running)"
+  fi
+  exit 1
+fi
+
+# Special cases
+case "$SESSION" in
+  all)
+    echo "Killing all tmux sessions..."
+    if tmux info &>/dev/null; then
+      for session in $(tmux list-sessions -F '#{session_name}'); do
+        echo "  Killing: $session"
+        tmux kill-session -t "$session"
+      done
+      echo "✓ All sessions killed"
+      
+      # Clear backup file
+      if [ -f "$BACKUP_FILE" ]; then
+        > "$BACKUP_FILE"
+        echo "✓ Backup file cleared"
+      fi
+    else
+      echo "No tmux server running"
+    fi
+    ;;
+    
+  *)
+    if ! tmux info &>/dev/null; then
+      echo "No tmux server running"
+      exit 1
+    fi
+    
+    if tmux has-session -t "$SESSION" 2>/dev/null; then
+      echo "Killing session: $SESSION"
+      tmux kill-session -t "$SESSION"
+      echo "✓ Session '$SESSION' killed"
+      
+      # Remove session from backup file if it exists
+      if [ -f "$BACKUP_FILE" ]; then
+        # Filter out lines for this session
+        grep -v "^$SESSION:" "$BACKUP_FILE" > "$TEMP_FILE" 2>/dev/null || true
+        mv "$TEMP_FILE" "$BACKUP_FILE"
+        echo "✓ Removed '$SESSION' from backup file"
+      fi
+    else
+      echo "Session '$SESSION' not found in tmux"
+      echo ""
+      echo "Available sessions:"
+      tmux ls
+      exit 1
+    fi
+    ;;
+esac
