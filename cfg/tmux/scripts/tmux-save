@@ -8,13 +8,56 @@ if ! tmux info &>/dev/null; then
   exit 0
 fi
 
-echo "Saving tmux sessions with windows and panes..."
+echo "Saving tmux sessions with windows, panes, and working directories..."
 
-# Save windows with names and layouts
-tmux list-windows -a -F \
-"#{session_name}:#{window_index}:#{window_name}:#{window_layout}" \
-> ~/.tmux/session-structure
+# Clear previous save file
+SAVE_FILE="$HOME/.tmux/session-structure"
+> "$SAVE_FILE"
 
-echo "✓ Saved session structure to ~/.tmux/session-structure"
-echo "Content:"
-cat ~/.tmux/session-structure
+# Save windows with names and panes with their working directories
+while IFS= read -r window_line; do
+  # Parse session:window:window_name
+  session=$(echo "$window_line" | cut -d: -f1)
+  window_index=$(echo "$window_line" | cut -d: -f2)
+  window_name=$(echo "$window_line" | cut -d: -f3)
+  
+  echo "Processing: $session:$window_index ($window_name)"
+  
+  # Get layout for this window
+  layout=$(tmux display-message -p -t "$session:$window_index" -F "#{window_layout}")
+  
+  # Get panes in this window with their working directories
+  pane_count=0
+  while IFS= read -r pane_line; do
+    pane_index=$(echo "$pane_line" | cut -d: -f1)
+    pane_id="$session:$window_index.$pane_index"
+    
+    # Get pane working directory (tmux 3.0+)
+    pane_path=$(tmux display-message -p -t "$pane_id" -F "#{pane_current_path}" 2>/dev/null)
+    
+    # Fallback for older tmux versions
+    if [ -z "$pane_path" ] || [ "$pane_path" = "" ]; then
+      pane_path=$(tmux display-message -p -t "$pane_id" -F "#{pane_current_command}" 2>/dev/null)
+      if [ "$pane_path" != "bash" ] && [ "$pane_path" != "zsh" ] && [ "$pane_path" != "sh" ]; then
+        pane_path="$HOME"
+      else
+        pane_path="$HOME"
+      fi
+    fi
+    
+    echo "$session:$window_index:$window_name:$pane_index:$pane_path:$layout" >> "$SAVE_FILE"
+    pane_count=$((pane_count + 1))
+  done < <(tmux list-panes -t "$session:$window_index" -F "#{pane_index}")
+  
+  echo "  Saved $pane_count panes for window $window_index"
+done < <(tmux list-windows -a -F "#{session_name}:#{window_index}:#{window_name}")
+
+echo ""
+echo "✓ Saved session structure to $SAVE_FILE"
+echo "Format: session:window_index:window_name:pane_index:pane_path:window_layout"
+echo ""
+echo "Content preview:"
+head -20 "$SAVE_FILE"
+if [ $(wc -l < "$SAVE_FILE") -gt 20 ]; then
+  echo "... (and more)"
+fi

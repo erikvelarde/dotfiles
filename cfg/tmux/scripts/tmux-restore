@@ -7,7 +7,7 @@ if [ ! -f "$SAVE_FILE" ]; then
   exit 1
 fi
 
-echo "Restoring tmux sessions with windows and panes..."
+echo "Restoring tmux sessions with windows, panes, and working directories..."
 
 # Start server if needed
 if ! tmux info &>/dev/null; then
@@ -16,90 +16,123 @@ if ! tmux info &>/dev/null; then
   sleep 1
 fi
 
-# Function to create panes from layout
-create_panes_from_layout() {
-  local session="$1"
-  local window="$2"
-  local layout="$3"
+# Keep track of processed windows to avoid duplicates
+declare -A processed_windows
+
+# First pass: Create sessions and windows
+echo "Step 1: Creating sessions and windows..."
+while IFS=: read -r session win_index win_name pane_index pane_path layout; do
+  window_key="$session:$win_index"
   
-  # If layout indicates multiple panes, split them
-  # Layout format example: "a4b8,143x40,0,0{71x40,0,0,71x40,72,0}"
-  # The { } indicates nested panes (splits)
-  
-  # Count how many pane groups are in the layout
-  # Simple heuristic: count opening braces
-  pane_count=$(echo "$layout" | grep -o "{" | wc -l)
-  pane_count=$((pane_count + 1))  # Add 1 for the main pane
-  
-  echo "  Creating $pane_count panes for window $window"
-  
-  # Create splits if needed
-  if [ "$pane_count" -gt 1 ]; then
-    # First split (vertical or horizontal)
-    tmux split-window -t "$session:$window" -h
-    
-    # If more than 2 panes, need more splits
-    if [ "$pane_count" -gt 2 ]; then
-      # Split the new pane (creates a 2x2 grid)
-      tmux split-window -t "$session:$window.1" -v
-    fi
-    
-    # Apply the exact layout
-    tmux select-layout -t "$session:$window" "$layout" 2>/dev/null || true
+  # Skip if we've already processed this window
+  if [ -n "${processed_windows[$window_key]}" ]; then
+    continue
   fi
-}
-
-# Keep track of created sessions
-declare -A created_sessions
-
-# Process each window
-while IFS=: read -r session win_index win_name layout; do
-  echo "Processing: $session - window $win_index ($win_name)"
+  
+  echo "  Creating window: $session:$win_index ($win_name)"
   
   # Check if session exists
-  if [ -z "${created_sessions[$session]}" ]; then
-    # First time seeing this session
-    if ! tmux has-session -t "$session" 2>/dev/null; then
-      echo "  Creating session: $session"
-      tmux new-session -d -s "$session" -n "$win_name"
-      created_sessions["$session"]=1
-      
-      # Create panes for this window
-      create_panes_from_layout "$session" "0" "$layout"
-    else
-      created_sessions["$session"]=1
-    fi
+  if ! tmux has-session -t "$session" 2>/dev/null; then
+    echo "    Creating new session: $session"
+    tmux new-session -d -s "$session" -n "$win_name"
   else
-    # Session exists, create or rename window
+    # Session exists, check if window exists
     if ! tmux list-windows -t "$session" -F "#{window_index}" | grep -qx "$win_index"; then
-      echo "  Adding window $win_index: $win_name"
-      tmux new-window -t "$session" -n "$win_name"
-      
-      # Move to correct index if needed
-      if [ "$win_index" != "0" ]; then
-        last_index=$(tmux list-windows -t "$session" -F "#{window_index}" | tail -1)
-        if [ "$last_index" != "$win_index" ]; then
-          tmux move-window -s "$session:$last_index" -t "$session:$win_index" 2>/dev/null || true
+      if [ "$win_index" = "0" ]; then
+        # For window 0, we need to rename the existing one
+        tmux rename-window -t "$session:0" "$win_name" 2>/dev/null || true
+      else
+        # Create new window
+        tmux new-window -d -t "$session" -n "$win_name"
+        # Move to correct index if needed
+        if [ "$win_index" != "0" ]; then
+          last_index=$(tmux list-windows -t "$session" -F "#{window_index}" | tail -1)
+          if [ "$last_index" != "$win_index" ]; then
+            tmux move-window -s "$session:$last_index" -t "$session:$win_index" 2>/dev/null || true
+          fi
         fi
       fi
-      
-      # Create panes for this window
-      create_panes_from_layout "$session" "$win_index" "$layout"
     else
-      # Window exists, just rename and apply layout
+      # Window exists, just rename it
       tmux rename-window -t "$session:$win_index" "$win_name" 2>/dev/null || true
-      tmux select-layout -t "$session:$win_index" "$layout" 2>/dev/null || true
     fi
   fi
+  
+  # Mark this window as processed
+  processed_windows["$window_key"]=1
 done < "$SAVE_FILE"
 
+# Second pass: Create panes and set working directories
 echo ""
-echo "✓ Tmux sessions restored with panes!"
+echo "Step 2: Creating panes and setting working directories..."
+
+# Group by window
+declare -A window_panes
+while IFS=: read -r session win_index win_name pane_index pane_path layout; do
+  window_key="$session:$win_index"
+  window_panes["$window_key"]+="$session:$win_index:$win_name:$pane_index:$pane_path:$layout"$'\n'
+done < "$SAVE_FILE"
+
+# Process each window's panes
+for window_key in "${!window_panes[@]}"; do
+  IFS=$'\n' read -r -d '' -a pane_lines <<< "${window_panes[$window_key]}"
+  
+  # Sort panes by pane_index
+  sorted_panes=($(printf '%s\n' "${pane_lines[@]}" | sort -t: -k4 -n))
+  
+  session=$(echo "$window_key" | cut -d: -f1)
+  win_index=$(echo "$window_key" | cut -d: -f2)
+  
+  echo "  Processing panes for $window_key"
+  
+  # Get layout from first pane (should be same for all panes in window)
+  first_pane="${sorted_panes[0]}"
+  layout=$(echo "$first_pane" | cut -d: -f6)
+  
+  # Create the first pane (already exists)
+  first_pane_info="${sorted_panes[0]}"
+  first_pane_index=$(echo "$first_pane_info" | cut -d: -f4)
+  first_pane_path=$(echo "$first_pane_info" | cut -d: -f5)
+  
+  echo "    Pane $first_pane_index -> cd $first_pane_path"
+  tmux send-keys -t "$session:$win_index.$first_pane_index" "cd '$first_pane_path' && clear" C-m 2>/dev/null || true
+  
+  # Create additional panes if needed
+  if [ ${#sorted_panes[@]} -gt 1 ]; then
+    for i in "${!sorted_panes[@]}"; do
+      if [ $i -eq 0 ]; then
+        continue # Skip first pane (already exists)
+      fi
+      
+      pane_info="${sorted_panes[$i]}"
+      pane_index=$(echo "$pane_info" | cut -d: -f4)
+      pane_path=$(echo "$pane_info" | cut -d: -f5)
+      
+      # Create split
+      echo "    Creating pane $pane_index -> cd $pane_path"
+      
+      # Alternate between horizontal and vertical splits for a balanced layout
+      if [ $((i % 2)) -eq 1 ]; then
+        tmux split-window -h -t "$session:$win_index" -c "$pane_path"
+      else
+        tmux split-window -v -t "$session:$win_index" -c "$pane_path"
+      fi
+      
+      # Send cd command to ensure correct directory
+      tmux send-keys -t "$session:$win_index.$pane_index" "cd '$pane_path' && clear" C-m 2>/dev/null || true
+    done
+    
+    # Apply the saved layout
+    echo "    Applying layout: $layout"
+    tmux select-layout -t "$session:$win_index" "$layout" 2>/dev/null || true
+  fi
+  
+  # Focus on pane 0
+  tmux select-pane -t "$session:$win_index.0" 2>/dev/null || true
+done
+
+echo ""
+echo "✓ Tmux sessions restored!"
 echo ""
 echo "Available sessions:"
 tmux ls
-echo ""
-echo "Window layouts:"
-while IFS=: read -r session win_index win_name layout; do
-  echo "  $session:$win_index ($win_name) - panes: $(echo "$layout" | grep -o "pane" | wc -l)"
-done < "$SAVE_FILE"
