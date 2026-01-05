@@ -22,6 +22,7 @@ return {
 				end,
 			},
 
+			-- Remove the duplicate window configuration, use just one
 			window = {
 				completion = {
 					border = "rounded",
@@ -38,8 +39,8 @@ return {
 			},
 
 			mapping = cmp.mapping.preset.insert({
-				["<C-k>"] = cmp.mapping.select_prev_item(), -- Changed from <C-k>
-				["<C-j>"] = cmp.mapping.select_next_item(), -- Changed from <C-j>
+				["<C-j>"] = cmp.mapping.select_next_item(), -- Changed to match your working config
+				["<C-k>"] = cmp.mapping.select_prev_item(), -- Changed to match your working config
 				["<C-b>"] = cmp.mapping.scroll_docs(-4),
 				["<C-f>"] = cmp.mapping.scroll_docs(4),
 				["<C-Space>"] = cmp.mapping.complete(),
@@ -153,25 +154,27 @@ return {
 				},
 			},
 
-			view = {
-				entries = { name = "custom", selection_order = "near_cursor" },
-			},
+			-- REMOVE this view configuration - it's likely causing the issue
+			-- view = {
+			--   entries = { name = "custom", selection_order = "near_cursor" },
+			-- },
 
-			window = {
-				completion = {
-					border = "rounded",
-					winhighlight = "Normal:Normal,FloatBorder:FloatBorder,CursorLine:Visual",
-					scrollbar = false,
-					max_width = 50,
-				},
-				documentation = {
-					border = "rounded",
-					side = "right",
-					max_width = 60,
-					max_height = 15,
-					winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
-				},
-			},
+			-- REMOVE this duplicate window configuration
+			-- window = {
+			--   completion = {
+			--     border = "rounded",
+			--     winhighlight = "Normal:Normal,FloatBorder:FloatBorder,CursorLine:Visual",
+			--     scrollbar = false,
+			--     max_width = 50,
+			--   },
+			--   documentation = {
+			--     border = "rounded",
+			--     side = "right",
+			--     max_width = 60,
+			--     max_height = 15,
+			--     winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+			--   },
+			-- },
 		})
 
 		-- Custom highlights for minimalist look
