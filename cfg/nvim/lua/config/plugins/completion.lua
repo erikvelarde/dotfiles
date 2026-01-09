@@ -22,7 +22,6 @@ return {
 				end,
 			},
 
-			-- Remove the duplicate window configuration, use just one
 			window = {
 				completion = {
 					border = "rounded",
@@ -39,8 +38,8 @@ return {
 			},
 
 			mapping = cmp.mapping.preset.insert({
-				["<C-j>"] = cmp.mapping.select_next_item(), -- Changed to match your working config
-				["<C-k>"] = cmp.mapping.select_prev_item(), -- Changed to match your working config
+				["<C-j>"] = cmp.mapping.select_next_item(),
+				["<C-k>"] = cmp.mapping.select_prev_item(),
 				["<C-b>"] = cmp.mapping.scroll_docs(-4),
 				["<C-f>"] = cmp.mapping.scroll_docs(4),
 				["<C-Space>"] = cmp.mapping.complete(),
@@ -79,55 +78,47 @@ return {
 			}),
 
 			formatting = {
-				fields = { "kind", "abbr", "menu" },
+				fields = { "abbr", "kind" }, -- Changed order to put kind on the right
 				format = function(entry, vim_item)
-					-- Icons instead of category names
-					local kind_icons = {
-						Text = "󰉿",
-						Method = "󰆧",
-						Function = "󰊕",
-						Constructor = "",
-						Field = "󰜢",
-						Variable = "󰀫",
-						Class = "󰠱",
-						Interface = "",
-						Module = "",
-						Property = "󰜢",
-						Unit = "󰑭",
-						Value = "󰎠",
-						Enum = "",
-						Keyword = "󰌋",
-						Snippet = "",
-						Color = "󰏘",
-						File = "󰈙",
-						Reference = "󰈇",
-						Folder = "󰉋",
-						EnumMember = "",
-						Constant = "󰏿",
-						Struct = "󰙅",
-						Event = "",
-						Operator = "󰆕",
-						TypeParameter = "",
+					-- Abbreviated category names for the right side
+					local kind_abbr = {
+						Text = "txt",
+						Method = "mtd",
+						Function = "fn",
+						Constructor = "ctor",
+						Field = "fld",
+						Variable = "var",
+						Class = "cls",
+						Interface = "iface",
+						Module = "mod",
+						Property = "prop",
+						Unit = "unit",
+						Value = "val",
+						Enum = "enum",
+						Keyword = "kw",
+						Snippet = "snip",
+						Color = "color",
+						File = "file",
+						Reference = "ref",
+						Folder = "dir",
+						EnumMember = "emem",
+						Constant = "const",
+						Struct = "struct",
+						Event = "event",
+						Operator = "op",
+						TypeParameter = "type",
 					}
 
-					-- Set icon
-					vim_item.kind = string.format("%s", kind_icons[vim_item.kind] or "󰗇")
+					-- Set abbreviated text on the right
+					vim_item.kind = string.format(" %s ", kind_abbr[vim_item.kind] or vim_item.kind)
 
-					-- Optional source hint (very subtle)
-					local source_hint = {
-						nvim_lsp = "",
-						luasnip = "󰨭",
-						buffer = "󰧮",
-						path = "󰉋",
-					}
-					vim_item.menu = source_hint[entry.source.name] or ""
+					-- Don't show source hints in the menu anymore since we have limited space
+					vim_item.menu = ""
 
-					-- Optional: Show source name only for certain types
-					if entry.source.name == "nvim_lsp" then
-						local item = entry:get_completion_item()
-						if item.detail then
-							vim_item.menu = item.detail
-						end
+					-- Truncate completion text if needed to make room for category
+					local max_width = 40
+					if #vim_item.abbr > max_width then
+						vim_item.abbr = string.sub(vim_item.abbr, 1, max_width - 3) .. "..."
 					end
 
 					return vim_item
@@ -153,49 +144,58 @@ return {
 					cmp.config.compare.order,
 				},
 			},
-
-			-- REMOVE this view configuration - it's likely causing the issue
-			-- view = {
-			--   entries = { name = "custom", selection_order = "near_cursor" },
-			-- },
-
-			-- REMOVE this duplicate window configuration
-			-- window = {
-			--   completion = {
-			--     border = "rounded",
-			--     winhighlight = "Normal:Normal,FloatBorder:FloatBorder,CursorLine:Visual",
-			--     scrollbar = false,
-			--     max_width = 50,
-			--   },
-			--   documentation = {
-			--     border = "rounded",
-			--     side = "right",
-			--     max_width = 60,
-			--     max_height = 15,
-			--     winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
-			--   },
-			-- },
 		})
 
-		-- Custom highlights for minimalist look
+		-- Custom highlights for text-only UI with different colors
 		vim.api.nvim_set_hl(0, "FloatBorder", { fg = "#444444", bg = "NONE" })
 		vim.api.nvim_set_hl(0, "NormalFloat", { bg = "NONE" })
 		vim.api.nvim_set_hl(0, "Pmenu", { bg = "NONE" })
 
-		-- Main completion text
+		-- Main completion text (left side)
 		vim.api.nvim_set_hl(0, "CmpItemAbbr", { fg = "#c0caf5" })
 		vim.api.nvim_set_hl(0, "CmpItemAbbrMatch", { fg = "#7aa2f7", bold = true })
 		vim.api.nvim_set_hl(0, "CmpItemAbbrMatchFuzzy", { fg = "#7aa2f7", bold = true })
 
-		-- Icons (subtle color)
-		vim.api.nvim_set_hl(0, "CmpItemKind", { fg = "#bb9af7" })
+		-- Category labels on the right side with different colors
+		-- Using subtle, professional colors
+		vim.api.nvim_set_hl(0, "CmpItemKindText", { fg = "#73daca", bg = "#1a1b26", italic = false })
+		vim.api.nvim_set_hl(0, "CmpItemKindMethod", { fg = "#ff9e64", bg = "#1a1b26", italic = false })
+		vim.api.nvim_set_hl(0, "CmpItemKindFunction", { fg = "#7aa2f7", bg = "#1a1b26", italic = false })
+		vim.api.nvim_set_hl(0, "CmpItemKindConstructor", { fg = "#e0af68", bg = "#1a1b26", italic = false })
+		vim.api.nvim_set_hl(0, "CmpItemKindField", { fg = "#bb9af7", bg = "#1a1b26", italic = false })
+		vim.api.nvim_set_hl(0, "CmpItemKindVariable", { fg = "#9ece6a", bg = "#1a1b26", italic = false })
+		vim.api.nvim_set_hl(0, "CmpItemKindClass", { fg = "#ff9e64", bg = "#1a1b26", italic = false })
+		vim.api.nvim_set_hl(0, "CmpItemKindInterface", { fg = "#7dcfff", bg = "#1a1b26", italic = false })
+		vim.api.nvim_set_hl(0, "CmpItemKindModule", { fg = "#f7768e", bg = "#1a1b26", italic = false })
+		vim.api.nvim_set_hl(0, "CmpItemKindProperty", { fg = "#bb9af7", bg = "#1a1b26", italic = false })
+		vim.api.nvim_set_hl(0, "CmpItemKindUnit", { fg = "#73daca", bg = "#1a1b26", italic = false })
+		vim.api.nvim_set_hl(0, "CmpItemKindValue", { fg = "#9ece6a", bg = "#1a1b26", italic = false })
+		vim.api.nvim_set_hl(0, "CmpItemKindEnum", { fg = "#ff9e64", bg = "#1a1b26", italic = false })
+		vim.api.nvim_set_hl(0, "CmpItemKindKeyword", { fg = "#f7768e", bg = "#1a1b26", italic = false })
+		vim.api.nvim_set_hl(0, "CmpItemKindSnippet", { fg = "#e0af68", bg = "#1a1b26", italic = false })
+		vim.api.nvim_set_hl(0, "CmpItemKindColor", { fg = "#7dcfff", bg = "#1a1b26", italic = false })
+		vim.api.nvim_set_hl(0, "CmpItemKindFile", { fg = "#7aa2f7", bg = "#1a1b26", italic = false })
+		vim.api.nvim_set_hl(0, "CmpItemKindReference", { fg = "#bb9af7", bg = "#1a1b26", italic = false })
+		vim.api.nvim_set_hl(0, "CmpItemKindFolder", { fg = "#7aa2f7", bg = "#1a1b26", italic = false })
+		vim.api.nvim_set_hl(0, "CmpItemKindEnumMember", { fg = "#ff9e64", bg = "#1a1b26", italic = false })
+		vim.api.nvim_set_hl(0, "CmpItemKindConstant", { fg = "#9ece6a", bg = "#1a1b26", italic = false })
+		vim.api.nvim_set_hl(0, "CmpItemKindStruct", { fg = "#e0af68", bg = "#1a1b26", italic = false })
+		vim.api.nvim_set_hl(0, "CmpItemKindEvent", { fg = "#f7768e", bg = "#1a1b26", italic = false })
+		vim.api.nvim_set_hl(0, "CmpItemKindOperator", { fg = "#73daca", bg = "#1a1b26", italic = false })
+		vim.api.nvim_set_hl(0, "CmpItemKindTypeParameter", { fg = "#7dcfff", bg = "#1a1b26", italic = false })
 
-		-- Source hints (very subtle)
-		vim.api.nvim_set_hl(0, "CmpItemMenu", { fg = "#565f89", italic = true })
+		-- Fallback for any other types
+		vim.api.nvim_set_hl(0, "CmpItemKind", { fg = "#bb9af7", bg = "#1a1b26", italic = false })
 
-		-- Selection
+		-- Selection highlights
 		vim.api.nvim_set_hl(0, "PmenuSel", { bg = "#2d3045" })
 		vim.api.nvim_set_hl(0, "CmpItemAbbrSelected", { fg = "#ffffff", bold = true })
+		vim.api.nvim_set_hl(0, "CmpItemKindSelected", {
+			fg = "#ffffff",
+			bg = "#2d3045",
+			bold = true,
+			italic = false,
+		})
 	end,
 }
 
