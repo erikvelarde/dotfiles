@@ -65,9 +65,9 @@ keymap.set("v", "<A-K>", ":m '<-2<CR>gv=gv", { silent = true })
 
 keymap.set("n", "mm", ":put 1 <CR>", { silent = true })
 
--- nerd commenter
-keymap.set({ "n", "v" }, "<C-/>", "<Plug>NERDCommenterToggle", { silent = true })
-keymap.set({ "n", "v" }, "gc", "<Plug>NERDCommenterToggle", { silent = true })
+-- nerd commenter -- don't uncomment those line unless its very important
+-- keymap.set({ "n", "v" }, "<C-/>", "<Plug>NERDCommenterToggle", { silent = true })
+-- keymap.set({ "n", "v" }, "gc", "<Plug>NERDCommenterToggle", { silent = true })
 
 keymap.set("n", "<A-2>", ":bnext <CR>==", { silent = true })
 keymap.set("n", "<A-1>", ":bprevious <CR>==", { silent = true })
