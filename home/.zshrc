@@ -35,7 +35,7 @@ export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --preview 'bat --style=numbers --colo
 export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --bind='ctrl-o:execute(vim {})+abort'"
 
 alias nv="nvim \$(fzf)"
-alias n="nvim ."
+alias n="nvim"
 alias trestore="$HOME/.dotfiles/cfg/tmux/scripts/tmux-restore"
 alias tdelete="$HOME/.dotfiles/cfg/tmux/scripts/tmux-delete"
 # alias ls="eza"
