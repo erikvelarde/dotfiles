@@ -1,4 +1,8 @@
 return {
+	{
+		"rebelot/kanagawa.nvim",
+	},
+
 	{ "ellisonleao/gruvbox.nvim", priority = 1000, config = true },
 	{ "datsfilipe/vesper.nvim" },
 	{ "shaunsingh/nord.nvim" },

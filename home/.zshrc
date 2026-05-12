@@ -35,7 +35,8 @@ export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --preview 'bat --style=numbers --colo
 export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --bind='ctrl-o:execute(vim {})+abort'"
 
 alias nv="nvim \$(fzf)"
-alias n="nvim"
+alias n="nvim -c 'Telescope find_files'"
+alias v="nvim"
 alias trestore="$HOME/.dotfiles/cfg/tmux/scripts/tmux-restore"
 alias tdelete="$HOME/.dotfiles/cfg/tmux/scripts/tmux-delete"
 # alias ls="eza"
@@ -94,3 +95,6 @@ export ANDROID_SDK_ROOT=/opt/android-sdk
 export PATH=$PATH:$ANDROID_HOME/tools
 export PATH=$PATH:$ANDROID_HOME/platform-tools
 export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin
+
+# opencode
+export PATH=/home/erick/.opencode/bin:$PATH

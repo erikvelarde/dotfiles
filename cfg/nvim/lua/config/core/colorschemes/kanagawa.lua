@@ -1,10 +1,11 @@
+-- Default options:
 require("kanagawa").setup({
 	compile = false, -- enable compiling the colorscheme
 	undercurl = true, -- enable undercurls
-	commentStyle = { italic = true },
+	commentStyle = { italic = false },
 	functionStyle = {},
-	keywordStyle = { italic = true },
-	statementStyle = { bold = true },
+	keywordStyle = { italic = false },
+	statementStyle = { bold = false },
 	typeStyle = {},
 	transparent = true, -- do not set background color
 	dimInactive = false, -- dim inactive window `:h hl-NormalNC`
@@ -16,11 +17,12 @@ require("kanagawa").setup({
 	overrides = function(colors) -- add/modify highlights
 		return {}
 	end,
-	theme = "wave", -- Load "wave" theme when 'background' option is not set
+	theme = "lotus", -- Load "wave" theme
 	background = { -- map the value of 'background' option to a theme
 		dark = "wave", -- try "dragon" !
 		light = "lotus",
 	},
 })
 
-vim.cmd("colorscheme kanagawa")
+-- setup must be called before loading
+vim.cmd("colorscheme kanagawa-dragon")

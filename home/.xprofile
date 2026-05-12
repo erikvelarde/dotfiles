@@ -6,3 +6,4 @@ xrandr --output LVDS1 --mode 1366x768 --output VGA1 --mode 1440x900 --left-of LV
 
 nitrogen --restore 
 setxkbmap -option ctrl:nocaps
+# setxkbmap -option caps:shiftlock
