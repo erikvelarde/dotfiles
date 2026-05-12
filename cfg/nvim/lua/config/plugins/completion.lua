@@ -21,11 +21,10 @@ return {
 					luasnip.lsp_expand(args.body)
 				end,
 			},
-
 			window = {
 				completion = {
 					border = "rounded",
-					winhighlight = "Normal:Normal,FloatBorder:FloatBorder,CursorLine:Visual",
+					winhighlight = "Normal:Normal,FloatBorder:FloatBorder,CursorLine:PmenuSel,Search:None",
 					scrollbar = false,
 				},
 				documentation = {
@@ -36,10 +35,11 @@ return {
 					scrollbar = false,
 				},
 			},
-
 			mapping = cmp.mapping.preset.insert({
-				["<C-j>"] = cmp.mapping.select_next_item(),
-				["<C-k>"] = cmp.mapping.select_prev_item(),
+				["<C-j>"] = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Select }),
+				["<C-k>"] = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Select }),
+				["<Down>"] = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Select }),
+				["<Up>"] = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Select }),
 				["<C-b>"] = cmp.mapping.scroll_docs(-4),
 				["<C-f>"] = cmp.mapping.scroll_docs(4),
 				["<C-Space>"] = cmp.mapping.complete(),
@@ -64,7 +64,6 @@ return {
 					end
 				end, { "i", "s" }),
 			}),
-
 			sources = cmp.config.sources({
 				{
 					name = "nvim_lsp",
@@ -76,7 +75,6 @@ return {
 				{ name = "buffer" },
 				{ name = "path" },
 			}),
-
 			formatting = {
 				fields = { "abbr", "kind" }, -- Changed order to put kind on the right
 				format = function(entry, vim_item)
@@ -124,12 +122,10 @@ return {
 					return vim_item
 				end,
 			},
-
 			experimental = {
 				ghost_text = false,
 				native_menu = false,
 			},
-
 			sorting = {
 				priority_weight = 2.0,
 				comparators = {
@@ -155,6 +151,8 @@ return {
 		vim.api.nvim_set_hl(0, "CmpItemAbbr", { fg = "#c0caf5" })
 		vim.api.nvim_set_hl(0, "CmpItemAbbrMatch", { fg = "#7aa2f7", bold = true })
 		vim.api.nvim_set_hl(0, "CmpItemAbbrMatchFuzzy", { fg = "#7aa2f7", bold = true })
+		-- Ensure normal menu items have good visibility
+		vim.api.nvim_set_hl(0, "Pmenu", { fg = "#c0caf5", bg = "#1a1b26" })
 
 		-- Category labels on the right side with different colors
 		-- Using subtle, professional colors
@@ -187,12 +185,12 @@ return {
 		-- Fallback for any other types
 		vim.api.nvim_set_hl(0, "CmpItemKind", { fg = "#bb9af7", bg = "#1a1b26", italic = false })
 
-		-- Selection highlights
-		vim.api.nvim_set_hl(0, "PmenuSel", { bg = "#2d3045" })
+		-- Selection highlights - improved visibility
+		vim.api.nvim_set_hl(0, "PmenuSel", { bg = "#4361ee", fg = "#ffffff", bold = true })
 		vim.api.nvim_set_hl(0, "CmpItemAbbrSelected", { fg = "#ffffff", bold = true })
 		vim.api.nvim_set_hl(0, "CmpItemKindSelected", {
 			fg = "#ffffff",
-			bg = "#2d3045",
+			bg = "#4361ee",
 			bold = true,
 			italic = false,
 		})
