@@ -14,7 +14,8 @@ return {
 				go = { "ast_grep" },
 				python = { "black" },
 				rust = { "ast_grep" },
-				php = { "phpcsfixer" },
+				-- php = { "php" },
+				php = { "php_cs_fixer" },
 				java = { "ast_grep", "clang_format" },
 				blade = { "blade_formatter" },
 				dart = { "ast_grep" }, -- if you use it for flutter
@@ -26,6 +27,18 @@ return {
 				async = false,
 			},
 		})
+		formatters = {
+			-- ["php"] = {
+			-- 	command = "php",
+			-- 	args = {
+			-- 		vim.fn.stdpath("data") .. "/mason/packages/pretty-php/pretty-php.phar", -- Mason path
+			-- 		"fix",
+			-- 		"--indent-style=space",
+			-- 		"$FILENAME",
+			-- 		"--indent-size=4",
+			-- 	},
+			-- },
+		}
 
 		-- formatters = {
 		--   -- Stylua with custom config
