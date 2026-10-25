@@ -1,5 +1,5 @@
 // palette from ~/.config/qtile/bar/colors.ini
-$bg: #131519;
+$bg: #0f1013;
 $surface: #1c1f26;
 $track: #2a2e36;
 $fg: #abb2bf;
@@ -16,7 +16,7 @@ $white: #dcdfe4;
   all: unset;
   font-family: "JetBrains Mono", "Symbols Nerd Font";
   font-weight: bold;
-  font-size: 10px;
+  font-size: 12px;
   color: $fg;
 }
 
@@ -68,7 +68,7 @@ $white: #dcdfe4;
 .ws.occupied:hover .pill { background-color: $white; }
 
 // ---------- clock ----------
-.clock .hour, .clock .min { font-size: 11px; }
+.clock .hour, .clock .min { font-size: 13px; }
 .clock .hour { color: $white; }
 .clock .sep  { color: $dim; }
 .clock .min  { color: $cyan; }
@@ -77,7 +77,7 @@ $white: #dcdfe4;
 // ---------- stats ----------
 .icon {
   font-family: "Symbols Nerd Font";
-  font-size: 14px;
+  font-size: 15px;
 }
 .val { color: $white; }
 
