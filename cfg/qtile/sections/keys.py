@@ -13,6 +13,7 @@ from global_variables import (
     screenshot,
     color_picker,
     dashboard,
+    magnifier,
     web_browser_secodary
 )  # >> ignore the next error
 
@@ -138,6 +139,7 @@ keys = [
         desc="Take Screenshot of selected area",
     ),
     # Misc --
+    Key([mod], "z", lazy.spawn(magnifier), desc="Toggle screen magnifier"),
     Key([mod], "p", lazy.spawn(color_picker), desc="Run colorpicker"),
     Key(
         ["mod1", "control"],
@@ -263,11 +265,11 @@ keys = [
         lazy.window.toggle_floating(),
         desc="Toggle floating",
     ),
-    # polybar
+    # eww sidebar
     Key(
         [mod, "shift"],
         "p",
-        lazy.spawn(rofi_applets + "polybar_setup --toggle"),
-        desc="kill polybar",
+        lazy.spawn(rofi_applets + "sidebar_setup --toggle"),
+        desc="toggle eww sidebar",
     ),
 ]

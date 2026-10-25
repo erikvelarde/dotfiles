@@ -24,5 +24,5 @@ RICE_NAME=$(cat "$HOME/.rice.conf")
 pkill -9 polybar
 pkill -9 eww
 
-"$qdir"/scripts/qtile_bar
+"$qdir"/scripts/sidebar_setup --up
 redshift -c ~/.config/redshift/redshift.conf &

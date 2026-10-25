@@ -1,0 +1,101 @@
+// palette from ~/.config/qtile/bar/colors.ini
+$bg: #131519;
+$surface: #1c1f26;
+$track: #2a2e36;
+$fg: #abb2bf;
+$dim: #4b5263;
+$red: #e16b75;
+$green: #97c379;
+$yellow: #e5c07b;
+$blue: #61afef;
+$magenta: #c678dd;
+$cyan: #56b6c2;
+$white: #dcdfe4;
+
+* {
+  all: unset;
+  font-family: "JetBrains Mono", "Symbols Nerd Font";
+  font-weight: bold;
+  font-size: 10px;
+  color: $fg;
+}
+
+.bar {
+  background-color: $bg;
+  padding: 0 4px;
+}
+
+.module {
+  background-color: $surface;
+  border-radius: 8px;
+  margin: 3px 0;
+  padding: 0 10px;
+}
+
+// ---------- workspaces ----------
+// empty = hollow circle, occupied = solid square
+// current = same shape, but bigger, cyan and glowing
+.ws { padding: 0 4px; }
+
+.ws .pill {
+  min-width: 8px;
+  min-height: 8px;
+  transition: all 200ms ease;
+}
+.ws.empty .pill {
+  border: 2px solid $dim;
+  border-radius: 8px;
+  min-width: 4px;
+  min-height: 4px;
+}
+.ws.occupied .pill {
+  background-color: $yellow;
+  border-radius: 2px;
+}
+.ws.active .pill {
+  min-width: 11px;
+  min-height: 11px;
+  border-color: $cyan;
+  box-shadow: 0 0 6px rgba(86, 182, 194, 0.7);
+}
+.ws.occupied.active .pill { background-color: $cyan; }
+.ws.empty.active .pill {
+  min-width: 7px;
+  min-height: 7px;
+}
+
+.ws:hover .pill { border-color: $white; }
+.ws.occupied:hover .pill { background-color: $white; }
+
+// ---------- clock ----------
+.clock .hour, .clock .min { font-size: 11px; }
+.clock .hour { color: $white; }
+.clock .sep  { color: $dim; }
+.clock .min  { color: $cyan; }
+.clock .date { color: $fg; }
+
+// ---------- stats ----------
+.icon {
+  font-family: "Symbols Nerd Font";
+  font-size: 14px;
+}
+.val { color: $white; }
+
+.ram  .icon { color: $cyan; }
+.cpu  .icon { color: $magenta; }
+.disk .icon { color: $yellow; }
+.bri  .icon { color: $yellow; }
+.vol  .icon { color: $green; }
+.wifi .icon { color: $blue; }
+.vol.muted .icon, .vol.muted .val,
+.wifi.off .icon, .wifi.off .val { color: $red; }
+
+.stat:hover .icon, .stat:hover .val { color: $white; }
+
+tooltip {
+  background-color: $surface;
+  border: 1px solid $track;
+  border-radius: 8px;
+  padding: 4px 8px;
+}
+tooltip label { color: $white; }

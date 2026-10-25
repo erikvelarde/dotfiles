@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# Prints the Qtile groups as JSON whenever the current group or window list changes.
+ICON_ACTIVE=$''
+ICON_OCCUPIED=$''
+ICON_EMPTY=$''
+
+print_ws() {
+  local cur n occ="" out="[" w d s icon
+  cur=$(xprop -root _NET_CURRENT_DESKTOP | awk '{print $3}')
+  n=$(xprop -root _NET_NUMBER_OF_DESKTOPS | awk '{print $3}')
+  for w in $(xprop -root _NET_CLIENT_LIST | grep -o '0x[0-9a-f]*'); do
+    d=$(xprop -id "$w" _NET_WM_DESKTOP 2>/dev/null | awk '{print $3}')
+    occ+=" $d "
+  done
+  for ((i = 0; i < ${n:-0}; i++)); do
+    if [[ $occ == *" $i "* ]]; then
+      s=occupied; icon=$ICON_OCCUPIED
+    else
+      s=empty; icon=$ICON_EMPTY
+    fi
+    [[ $i == "$cur" ]] && s+=" active" && icon=$ICON_ACTIVE
+    out+="{\"id\":$((i + 1)),\"index\":$i,\"state\":\"$s\",\"icon\":\"$icon\"},"
+  done
+  echo "${out%,}]"
+}
+
+print_ws
+xprop -spy -root _NET_CURRENT_DESKTOP _NET_CLIENT_LIST | while read -r _; do print_ws; done

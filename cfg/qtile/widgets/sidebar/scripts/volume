@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Prints {"vol":N,"muted":bool} now and on every sink change.
+print_vol() {
+  local vol muted
+  vol=$(pactl get-sink-volume @DEFAULT_SINK@ | grep -o '[0-9]*%' | head -n1 | tr -d %)
+  [[ $(pactl get-sink-mute @DEFAULT_SINK@ | awk '{print $2}') == yes ]] && muted=true || muted=false
+  echo "{\"vol\":${vol:-0},\"muted\":$muted}"
+}
+
+print_vol
+pactl subscribe | grep --line-buffered -E "'change' on (sink|server)" | while read -r _; do print_vol; done

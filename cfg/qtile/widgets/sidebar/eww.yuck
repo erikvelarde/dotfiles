@@ -1,0 +1,85 @@
+;; Bottom bar for Qtile (eww), launched by ~/.config/qtile/scripts/sidebar_setup
+
+;; ---------- data ----------
+;; EWW_RAM / EWW_CPU / EWW_DISK / EWW_TIME are built in (no processes spawned)
+(deflisten workspaces :initial "[]" "~/.config/qtile/widgets/sidebar/scripts/workspaces")
+(deflisten volume :initial "{\"vol\":0,\"muted\":false}" "~/.config/qtile/widgets/sidebar/scripts/volume")
+(defpoll wifi :interval "10s" :initial "{\"signal\":0,\"ssid\":\"\",\"icon\":\"\",\"on\":false}" "~/.config/qtile/widgets/sidebar/scripts/wifi")
+(defpoll brightness :interval "5s" :initial "0" "xbacklight -get | cut -d. -f1")
+(defvar show_date false)
+
+;; ---------- widgets ----------
+(defwidget workspaces_w []
+  (eventbox :onscroll "if [ {} = up ]; then qtile cmd-obj -o screen -f prev_group; else qtile cmd-obj -o screen -f next_group; fi"
+    (box :class "module workspaces" :orientation "h" :space-evenly false :spacing 0
+      (for ws in workspaces
+        (button :class "ws ${ws.state}"
+                :tooltip "Workspace ${ws.id}"
+                :onclick "xdotool set_desktop ${ws.index}"
+          (box :class "pill" :halign "center" :valign "center"))))))
+
+(defwidget clock_w []
+  (eventbox :cursor "pointer"
+            :onclick "eww -c ~/.config/qtile/widgets/sidebar update show_date=${!show_date}"
+    (box :class "module clock" :space-evenly false :spacing 6
+         :tooltip "${formattime(EWW_TIME, '%A, %d %B %Y')}"
+      (label :class "date" :visible show_date :text "${formattime(EWW_TIME, '%a %d %b')}")
+      (label :class "hour" :text "${formattime(EWW_TIME, '%H')}")
+      (label :class "sep" :text ":")
+      (label :class "min" :text "${formattime(EWW_TIME, '%M')}"))))
+
+;; icon with the value to the right
+(defwidget stat [icon value text class tip onclick onrightclick onscroll]
+  (eventbox :onclick onclick :onrightclick onrightclick :onscroll onscroll :cursor "pointer"
+    (box :class "stat ${class}" :orientation "h" :space-evenly false :spacing 5 :tooltip tip
+      (label :class "icon" :text icon)
+      (label :class "val" :text text))))
+
+(defwidget system_w []
+  (box :class "module stats" :space-evenly false :spacing 12
+    (stat :class "ram" :icon ""
+          :value {EWW_RAM.used_mem_perc} :text "${round(EWW_RAM.used_mem_perc, 0)}%"
+          :tip "RAM ${round(EWW_RAM.used_mem / 1073741824, 1)} / ${round(EWW_RAM.total_mem / 1073741824, 1)} GB"
+          :onclick "alacritty -e htop &" :onrightclick "" :onscroll "")
+    (stat :class "cpu" :icon "󰍛"
+          :value {EWW_CPU.avg} :text "${round(EWW_CPU.avg, 0)}%"
+          :tip "CPU ${round(EWW_CPU.avg, 1)}%"
+          :onclick "alacritty -e htop &" :onrightclick "" :onscroll "")
+    (stat :class "disk" :icon "󰋊"
+          :value {EWW_DISK["/"].used_perc} :text "${round(EWW_DISK["/"].used_perc, 0)}%"
+          :tip "Disk / ${round(EWW_DISK["/"].used / 1073741824, 0)} / ${round(EWW_DISK["/"].total / 1073741824, 0)} GB"
+          :onclick "" :onrightclick "" :onscroll "")))
+
+(defwidget controls_w []
+  (box :class "module stats" :space-evenly false :spacing 12
+    (stat :class "vol ${volume.muted ? 'muted' : ''}" :icon {volume.muted ? "" : ""}
+          :value {volume.vol} :text {volume.muted ? "off" : "${volume.vol}%"}
+          :tip "Volume ${volume.vol}% (click mute, scroll change, right-click mixer)"
+          :onclick "pactl set-sink-mute @DEFAULT_SINK@ toggle"
+          :onrightclick "pavucontrol &"
+          :onscroll "if [ {} = up ]; then pactl set-sink-volume @DEFAULT_SINK@ +5%; else pactl set-sink-volume @DEFAULT_SINK@ -5%; fi")
+    (stat :class "bri" :icon "󰃠"
+          :value brightness :text "${brightness}%"
+          :tip "Brightness ${brightness}% (scroll to change)"
+          :onclick "" :onrightclick ""
+          :onscroll "if [ {} = up ]; then xbacklight -inc 5; else xbacklight -dec 5; fi; eww -c ~/.config/qtile/widgets/sidebar update brightness=$(xbacklight -get | cut -d. -f1)")
+    (stat :class "wifi ${wifi.on ? '' : 'off'}" :icon {wifi.icon}
+          :value {wifi.signal} :text {wifi.on ? "${wifi.signal}%" : "off"}
+          :tip {wifi.on ? "${wifi.ssid}" : "Offline"}
+          :onclick "~/.config/qtile/scripts/network_menu &" :onrightclick "" :onscroll "")))
+
+(defwidget bar_w []
+  (centerbox :class "bar" :orientation "h"
+    (box :halign "start" :space-evenly false :spacing 6 (workspaces_w) (system_w))
+    (box :halign "center" (clock_w))
+    (box :halign "end" :space-evenly false (controls_w))))
+
+;; ---------- window ----------
+(defwindow sidebar
+  :monitor 0
+  :geometry (geometry :x "0px" :y "0px" :width "100%" :height "30px" :anchor "bottom center")
+  :windowtype "dock"
+  :stacking "fg"
+  :wm-ignore false
+  :reserve (struts :side "bottom" :distance "30px")
+  (bar_w))

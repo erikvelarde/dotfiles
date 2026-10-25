@@ -47,3 +47,6 @@ opt.showcmd = true
 opt.showmode = false
 opt.showtabline = 0
 -- opt.clipboard = "unnamedplus"
+
+-- automatically re-read file when externally changed
+vim.opt.autoread = true

@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Prints wifi signal %, ssid and icon as JSON (no scanning, cheap to poll).
+ICONS=($'\U000f092f' $'\U000f091f' $'\U000f0922' $'\U000f0925' $'\U000f0928')
+ICON_OFF=$'\U000f092d'
+
+quality=$(awk 'NR > 2 { sub(/\./, "", $3); print $3; exit }' /proc/net/wireless)
+
+if [[ -z $quality ]]; then
+  jq -nc --arg icon "$ICON_OFF" '{signal: 0, ssid: "", icon: $icon, on: false}'
+  exit 0
+fi
+
+signal=$((quality * 100 / 70))
+((signal > 100)) && signal=100
+icon=${ICONS[$((signal * 4 / 100))]}
+ssid=$(nmcli -t -f NAME,TYPE connection show --active 2>/dev/null | awk -F: '$NF ~ /wireless/ { sub(/:[^:]*$/, ""); print; exit }')
+
+jq -nc --argjson signal "$signal" --arg ssid "$ssid" --arg icon "$icon" \
+  '{signal: $signal, ssid: $ssid, icon: $icon, on: true}'

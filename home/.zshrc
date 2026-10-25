@@ -96,5 +96,9 @@ export PATH=$PATH:$ANDROID_HOME/tools
 export PATH=$PATH:$ANDROID_HOME/platform-tools
 export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin
 
+export PATH="$HOME/development/flutter/bin:$PATH"
+
 # opencode
 export PATH=/home/erick/.opencode/bin:$PATH
+
+export PATH="$HOME/.pub-cache/bin:$PATH"

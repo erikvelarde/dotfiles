@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+xcolor --preview-size 255 --scale 7 > /dev/null 2>&1

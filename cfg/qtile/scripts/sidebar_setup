@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# Start / stop / toggle the eww sidebar (replaces polybar_setup)
+cfg="$HOME/.config/qtile/widgets/sidebar"
+
+start() {
+  pkill -x polybar
+  eww -c "$cfg" open sidebar
+}
+
+case "$1" in
+  --up)
+    eww -c "$cfg" kill >/dev/null 2>&1
+    start
+    ;;
+  --down)
+    eww -c "$cfg" kill
+    ;;
+  --toggle)
+    if eww -c "$cfg" active-windows 2>/dev/null | grep -q sidebar; then
+      eww -c "$cfg" close sidebar
+    else
+      start
+    fi
+    ;;
+  *)
+    ;;
+esac
