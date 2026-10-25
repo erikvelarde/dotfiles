@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# Git info for the tmux status bar: branch, changed files, ahead/behind.
+# Usage: git-status <path>   (prints nothing outside a git repo)
+
+cd "${1:-$PWD}" 2>/dev/null || exit 0
+git rev-parse --is-inside-work-tree &>/dev/null || exit 0
+
+surface="#1c1f26"
+branch=$(git symbolic-ref --short HEAD 2>/dev/null || git rev-parse --short HEAD 2>/dev/null)
+
+changes=$(git status --porcelain 2>/dev/null | wc -l)
+ahead=0 behind=0
+if counts=$(git rev-list --left-right --count '@{upstream}...HEAD' 2>/dev/null); then
+  read -r behind ahead <<<"$counts"
+fi
+
+# Branch is green when clean, yellow when dirty
+color="#97c379"
+[ "$changes" -gt 0 ] && color="#e5c07b"
+
+out="#[fg=$surface,bg=default]#[fg=$color,bg=$surface] #[fg=#dcdfe4,bold]$branch#[nobold]"
+[ "$changes" -gt 0 ] && out+=" #[fg=#e5c07b]●$changes"
+[ "$ahead" -gt 0 ] && out+=" #[fg=#61afef]↑$ahead"
+[ "$behind" -gt 0 ] && out+=" #[fg=#e16b75]↓$behind"
+out+="#[fg=$surface,bg=default]"
+
+printf '%s' "$out"
