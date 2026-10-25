@@ -15,6 +15,12 @@ case "$1" in
   --down)
     eww -c "$cfg" kill
     ;;
+  --show)
+    start
+    ;;
+  --hide)
+    eww -c "$cfg" close sidebar
+    ;;
   --toggle)
     if eww -c "$cfg" active-windows 2>/dev/null | grep -q sidebar; then
       eww -c "$cfg" close sidebar

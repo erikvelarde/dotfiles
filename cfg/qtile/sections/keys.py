@@ -20,6 +20,17 @@ from global_variables import (
 #  eww_dashboard = "~/.config/qtile/widgets/dashboard/lauch_dashboard"
 
 
+@lazy.function
+def toggle_fullscreen_and_sidebar(qtile):
+    """Toggle fullscreen; hide the eww sidebar while fullscreen, show it after."""
+    window = qtile.current_window
+    if window is None:
+        return
+    window.toggle_fullscreen()
+    action = "--hide" if window.fullscreen else "--show"
+    qtile.spawn(rofi_applets + "sidebar_setup " + action)
+
+
 keys = [
     # Terminal --
     Key(
@@ -216,8 +227,8 @@ keys = [
     Key(
         [mod],
         "f",
-        lazy.window.toggle_fullscreen(),
-        desc="Put the focused window to/from fullscreen mode",
+        toggle_fullscreen_and_sidebar(),
+        desc="Toggle fullscreen and hide/show the eww sidebar",
     ),
     # Go to next/prev group
     Key(

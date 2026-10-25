@@ -5,6 +5,7 @@ import = [
 
 [window]
 padding = { x = 0, y = 0 }
+dynamic_padding = true # when zoomed, split the leftover pixels between top and bottom
 opacity = 0.90
 blur = false
 
