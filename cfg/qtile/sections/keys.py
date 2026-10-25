@@ -22,13 +22,14 @@ from global_variables import (
 
 @lazy.function
 def toggle_fullscreen_and_sidebar(qtile):
-    """Toggle fullscreen; hide the eww sidebar while fullscreen, show it after."""
+    """Toggle fullscreen; hide the eww sidebar and tmux bar while fullscreen."""
     window = qtile.current_window
     if window is None:
         return
     window.toggle_fullscreen()
     action = "--hide" if window.fullscreen else "--show"
     qtile.spawn(rofi_applets + "sidebar_setup " + action)
+    qtile.spawn("tmux set -g status " + ("off" if window.fullscreen else "on"))
 
 
 keys = [
