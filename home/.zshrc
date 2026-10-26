@@ -4,18 +4,53 @@ fi
 
 export ZSH="$HOME/.oh-my-zsh"
 
-ZSH_THEME="agnoster"
+ZSH_THEME=""  # prompt is handled by powerlevel10k below
 
 plugins=(git)
 
 source $ZSH/oh-my-zsh.sh
 
 source ~/.powerlevel10k/powerlevel10k.zsh-theme
-
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
-source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+
+# ── UI: Catppuccin Mocha palette (variables come from ~/.colorss.sh) ─────
+# Completion menu
+zstyle ':completion:*' menu select
+zstyle ':completion:*' group-name ''
+zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*'
+zstyle ':completion:*:descriptions' format "%F{$magenta}󰁔 %B%d%b%f"
+zstyle ':completion:*:messages' format "%F{$comment}%d%f"
+zstyle ':completion:*:warnings' format "%F{$red}✘ no matches for: %d%f"
+zstyle ':completion:*:corrections' format "%F{$yellow}%d (errors: %e)%f"
+
+# Autosuggestions (ghost text)
+ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=$comment"
+ZSH_AUTOSUGGEST_STRATEGY=(history completion)
 source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
-source ~/.powerlevel10k/powerlevel10k.zsh-theme
+
+# Syntax highlighting (plugin itself is sourced at the very end of this file)
+typeset -gA ZSH_HIGHLIGHT_STYLES
+ZSH_HIGHLIGHT_STYLES[command]="fg=$green"
+ZSH_HIGHLIGHT_STYLES[builtin]="fg=$green"
+ZSH_HIGHLIGHT_STYLES[alias]="fg=$green"
+ZSH_HIGHLIGHT_STYLES[function]="fg=$green"
+ZSH_HIGHLIGHT_STYLES[precommand]="fg=$green,underline"
+ZSH_HIGHLIGHT_STYLES[unknown-token]="fg=$red,bold"
+ZSH_HIGHLIGHT_STYLES[reserved-word]="fg=$magenta"
+ZSH_HIGHLIGHT_STYLES[commandseparator]="fg=$operator"
+ZSH_HIGHLIGHT_STYLES[redirection]="fg=$operator"
+ZSH_HIGHLIGHT_STYLES[path]="fg=$directory,underline"
+ZSH_HIGHLIGHT_STYLES[globbing]="fg=$blue"
+ZSH_HIGHLIGHT_STYLES[single-hyphen-option]="fg=$accent"
+ZSH_HIGHLIGHT_STYLES[double-hyphen-option]="fg=$accent"
+ZSH_HIGHLIGHT_STYLES[single-quoted-argument]="fg=$yellow"
+ZSH_HIGHLIGHT_STYLES[double-quoted-argument]="fg=$yellow"
+ZSH_HIGHLIGHT_STYLES[dollar-quoted-argument]="fg=$yellow"
+ZSH_HIGHLIGHT_STYLES[back-quoted-argument]="fg=$pink"
+ZSH_HIGHLIGHT_STYLES[dollar-double-quoted-argument]="fg=$cyan"
+ZSH_HIGHLIGHT_STYLES[comment]="fg=$comment,italic"
+ZSH_HIGHLIGHT_STYLES[arg0]="fg=$green"
 
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
@@ -30,7 +65,11 @@ bindkey -M viins 'jk' vi-cmd-mode
 export PATH=/home/erick/.nvm/versions/node/v18.16.1/bin:/usr/condabin:/home/erick/.cargo/bin:/sbin:/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/sbin:/usr/lib/jvm/default/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl:/home/erick/.config/pycopy
 export PATH=/home/erick/.nvm/versions/node/v18.16.1/bin:/usr/condabin:/home/erick/.cargo/bin:/sbin:/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/sbin:/usr/lib/jvm/default/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl:/home/erick/.config/pycopy:/home/erick/.config/java-features
 export PATH=/home/erick/.nvm/versions/node/v18.16.1/bin:/usr/condabin:/home/erick/.cargo/bin:/sbin:/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/sbin:/usr/lib/jvm/default/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl:/home/erick/.config/pycopy:/home/erick/.config/java-features:/home/erick/.config/java-craft
-export FZF_DEFAULT_OPTS='--color=info:#f8f8f2,spinner:#f8f8f2,pointer:#50fa7b,hl:#50fa7b,fg:#f8f8f2,header:#6272a4'
+export FZF_DEFAULT_OPTS="--height=60% --layout=reverse --border=rounded --info=inline-right \
+  --prompt='❯ ' --pointer='▶' --marker='✓' --separator='─' --scrollbar='│' \
+  --color=bg:-1,bg+:$surface,fg:$identifier,fg+:$fg,hl:$magenta,hl+:$magenta \
+  --color=border:$surface,label:$accent,prompt:$magenta,pointer:$pink,marker:$green \
+  --color=info:$comment,spinner:$pink,header:$blue,query:$fg,gutter:-1"
 export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --preview 'bat --style=numbers --color=always --line-range :500 {}'"
 export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --bind='ctrl-o:execute(vim {})+abort'"
 
@@ -52,7 +91,6 @@ alias la='eza -a --icons --color=always --group-directories-first'
 alias l='eza -F --icons --color=always --group-directories-first'
 alias l.='eza -a | egrep "^\."'
 
-source ~/.powerlevel10k/powerlevel10k.zsh-theme
 export PATH="$PATH:$HOME/.config/composer/vendor/bin"
 
 # Created by `pipx` on 2024-07-07 17:54:21
@@ -102,3 +140,6 @@ export PATH="$HOME/development/flutter/bin:$PATH"
 export PATH=/home/erick/.opencode/bin:$PATH
 
 export PATH="$HOME/.pub-cache/bin:$PATH"
+
+# must stay last: wraps all widgets defined above
+source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh

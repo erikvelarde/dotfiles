@@ -1,25 +1,27 @@
 # ~/.colorss.sh
-# Camila color scheme (from your nvim config)
+# Catppuccin Mocha (darker): shared by .p10k.zsh and .zshrc
 # Base colors
-bg="#111111"           # From markdown autocmd
-alt_bg="#1a1a1a"       # Code block background
-fg="#FEFEFE"           # Normal foreground
-accent="#FFFEDB"       # Title/WarningMsg
+bg="#11111b"           # crust (terminal background)
+alt_bg="#181825"       # mantle
+fg="#cdd6f4"           # text
+accent="#b4befe"       # lavender
 
 # Functional colors
-red="#C34143"          # Error/Delete
-green="#A2A970"        # String/Green
-yellow="#E3D896"       # Type/Yellow
-blue="#7aa2f7"         # DiagnosticInfo (added blue)
-magenta="#AA9AAC"      # Function/Magenta
-cyan="#73daca"         # DiagnosticHint (added cyan)
-white="#FEFEFE"        # Normal foreground
+red="#f38ba8"          # red
+green="#a6e3a1"        # green
+yellow="#f9e2af"       # yellow
+blue="#89b4fa"         # blue
+magenta="#cba6f7"      # mauve
+cyan="#94e2d5"         # teal
+white="#cdd6f4"        # text
 
 # Neutral colors
-comment="#6f7b68"      # Comment
-operator="#DEBF7C"     # Operator
-directory="#C1C88D"    # Directory
-identifier="#8B9698"   # Identifier
+comment="#6c7086"      # overlay0
+operator="#fab387"     # peach
+directory="#89dceb"    # sky
+identifier="#9399b2"   # overlay2
+surface="#313244"      # surface0
+pink="#f5c2e7"         # pink
 
 # Special
 transparent="#00000000"
