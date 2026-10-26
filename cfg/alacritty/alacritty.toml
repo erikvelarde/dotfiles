@@ -1,6 +1,7 @@
 [general]
 import = [
-    "~/.config/alacritty/themes/camila.toml"
+    # "~/.config/alacritty/themes/camila.toml"
+    "~/.config/alacritty/themes/catppuccin-dark.toml"
 ]
 
 [window]

@@ -1,0 +1,60 @@
+# Catppuccin Mocha, darker variant: background uses "crust" instead of "base"
+[colors.primary]
+background = '#11111b' # crust
+foreground = '#cdd6f4' # text
+dim_foreground = '#7f849c'
+bright_foreground = '#cdd6f4'
+
+[colors.cursor]
+text = '#11111b'
+cursor = '#f5e0dc' # rosewater
+
+[colors.vi_mode_cursor]
+text = '#11111b'
+cursor = '#b4befe' # lavender
+
+[colors.selection]
+text = 'CellForeground'
+background = '#313244' # surface0
+
+[colors.search]
+matches = { foreground = '#11111b', background = '#a6adc8' }
+focused_match = { foreground = '#11111b', background = '#a6e3a1' }
+
+[colors.footer_bar]
+foreground = '#11111b'
+background = '#a6adc8'
+
+[colors.hints]
+start = { foreground = '#11111b', background = '#f9e2af' }
+end = { foreground = '#11111b', background = '#a6adc8' }
+
+[colors.normal]
+black   = '#45475a'
+red     = '#f38ba8'
+green   = '#a6e3a1'
+yellow  = '#f9e2af'
+blue    = '#89b4fa'
+magenta = '#f5c2e7'
+cyan    = '#94e2d5'
+white   = '#bac2de'
+
+[colors.bright]
+black   = '#585b70'
+red     = '#f38ba8'
+green   = '#a6e3a1'
+yellow  = '#f9e2af'
+blue    = '#89b4fa'
+magenta = '#f5c2e7'
+cyan    = '#94e2d5'
+white   = '#a6adc8'
+
+[colors.dim]
+black   = '#45475a'
+red     = '#f38ba8'
+green   = '#a6e3a1'
+yellow  = '#f9e2af'
+blue    = '#89b4fa'
+magenta = '#f5c2e7'
+cyan    = '#94e2d5'
+white   = '#bac2de'
