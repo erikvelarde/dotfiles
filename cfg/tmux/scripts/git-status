@@ -5,7 +5,7 @@
 cd "${1:-$PWD}" 2>/dev/null || exit 0
 git rev-parse --is-inside-work-tree &>/dev/null || exit 0
 
-surface="#1c1f26"
+surface="#2a2e36"
 branch=$(git symbolic-ref --short HEAD 2>/dev/null || git rev-parse --short HEAD 2>/dev/null)
 
 changes=$(git status --porcelain 2>/dev/null | wc -l)

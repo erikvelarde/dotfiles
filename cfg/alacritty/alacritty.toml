@@ -13,7 +13,7 @@ blur = false
 
 
 [font]
-size = 15.0
+size = 13.0
 # 28px + 4 = 32px rows: 23 rows fill exactly 768 - 32 (eww bar) = 736px, no gap
 offset = { x = 0, y = 4 }
 # normal = { family = "JetBrainsMonoNL Nerd Font", style = "Regular" }
