@@ -10,6 +10,9 @@ picom &
 udiskie -t &
 nm-applet &
 
+# audio server (needed for bluetooth audio devices: A2DP/HFP)
+systemctl --user start pipewire.socket pipewire-pulse.socket wireplumber.service
+
 xrandr --output VGA1 --brightness 0.63  # my external monitor
 xrandr --output LVDS1 --brightness 1 
 xrandr --output LVDS1 --mode 1366x768 --output VGA1 --mode 1440x900 --left-of LVDS1 

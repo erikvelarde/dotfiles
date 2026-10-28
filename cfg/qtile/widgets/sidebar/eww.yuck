@@ -5,8 +5,13 @@
 (deflisten workspaces :initial "[]" "~/.config/qtile/widgets/sidebar/scripts/workspaces")
 (deflisten volume :initial "{\"vol\":0,\"muted\":false}" "~/.config/qtile/widgets/sidebar/scripts/volume")
 (defpoll wifi :interval "10s" :initial "{\"signal\":0,\"ssid\":\"\",\"icon\":\"\",\"on\":false}" "~/.config/qtile/widgets/sidebar/scripts/wifi")
-(defpoll brightness :interval "5s" :initial "0" "xbacklight -get | cut -d. -f1")
+(defpoll brightness :interval "5s" :initial "0" "brightnessctl -m | cut -d, -f4 | tr -d %")
 (defvar show_date false)
+(defpoll bt :interval "5s" :initial "{\"on\":false,\"connected\":0,\"icon\":\"\",\"name\":\"\"}" "~/.config/qtile/widgets/sidebar/scripts/bluetooth status")
+(defpoll bat :interval "10s" :initial "{\"present\":false,\"cap\":0,\"icon\":\"\",\"status\":\"\",\"class\":\"normal\",\"ac\":false,\"power_w\":0,\"volt_v\":0,\"energy_now_wh\":0,\"energy_full_wh\":0,\"energy_design_wh\":0,\"health\":0,\"cycles\":0,\"tech\":\"\",\"model\":\"\",\"mfr\":\"\",\"time\":\"\",\"time_label\":\"\"}" "~/.config/qtile/widgets/sidebar/scripts/battery")
+(defvar bt_devices "[]")
+(defvar bt_scanning false)
+(defvar bt_busy "")
 
 ;; ---------- widgets ----------
 (defwidget workspaces_w []
@@ -57,22 +62,96 @@
           :tip "Volume ${volume.vol}% (click mute, scroll change, right-click mixer)"
           :onclick "pactl set-sink-mute @DEFAULT_SINK@ toggle"
           :onrightclick "pavucontrol &"
-          :onscroll "if [ {} = up ]; then pactl set-sink-volume @DEFAULT_SINK@ +5%; else pactl set-sink-volume @DEFAULT_SINK@ -5%; fi")
+          :onscroll "if [ {} = up ]; then wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+; else wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-; fi")
     (stat :class "bri" :icon "󰃠"
           :value brightness :text "${brightness}%"
           :tip "Brightness ${brightness}% (scroll to change)"
           :onclick "" :onrightclick ""
-          :onscroll "if [ {} = up ]; then xbacklight -inc 5; else xbacklight -dec 5; fi; eww -c ~/.config/qtile/widgets/sidebar update brightness=$(xbacklight -get | cut -d. -f1)")
+          :onscroll "if [ {} = up ]; then brightnessctl -q set 5%+; else brightnessctl -q set 5%-; fi; eww -c ~/.config/qtile/widgets/sidebar update brightness=$(brightnessctl -m | cut -d, -f4 | tr -d %)")
     (stat :class "wifi ${wifi.on ? '' : 'off'}" :icon {wifi.icon}
           :value {wifi.signal} :text {wifi.on ? "${wifi.signal}%" : "off"}
           :tip {wifi.on ? "${wifi.ssid}" : "Offline"}
           :onclick "~/.config/qtile/scripts/network_menu &" :onrightclick "" :onscroll "")))
 
+;; ---------- quick settings (far right) ----------
+(defwidget quick_w []
+  (box :class "module quick" :space-evenly false :spacing 10
+    (eventbox :cursor "pointer"
+              :onclick "~/.config/qtile/widgets/sidebar/scripts/popup toggle bluetooth &"
+              :onrightclick "~/.config/qtile/widgets/sidebar/scripts/bluetooth power &"
+      (box :class "stat bt ${bt.on ? '' : 'off'} ${bt.connected > 0 ? 'connected' : ''}"
+           :tooltip {bt.on ? (bt.connected > 0 ? "Connected: ${bt.name}" : "Bluetooth on") : "Bluetooth off"}
+        (label :class "icon" :text {bt.icon})))))
+
+;; ---------- battery ----------
+(defwidget battery_w []
+  (eventbox :cursor "pointer" :onclick "~/.config/qtile/widgets/sidebar/scripts/popup toggle battery &"
+    (box :class "module battery ${bat.class}" :space-evenly false :spacing 6
+         :tooltip "${bat.status} - ${bat.time_label}: ${bat.time}"
+      (label :class "icon" :text {bat.icon})
+      (label :class "val" :text "${bat.cap}%"))))
+
+(defwidget brow [k v]
+  (box :class "brow" :space-evenly false
+    (label :class "bk" :halign "start" :hexpand true :text k)
+    (label :class "bv" :halign "end" :text v)))
+
+(defwidget battery_menu_w []
+  (box :class "batmenu ${bat.class}" :orientation "v" :space-evenly false :spacing 8
+    (box :space-evenly false :spacing 8
+      (label :class "bttitle" :halign "start" :hexpand true :text "${bat.icon}  Battery"))
+    (box :class "batbig" :orientation "v" :space-evenly false :spacing 4
+      (label :class "batpct" :text "${bat.cap}%")
+      (label :class "batstate" :text "${bat.status}${bat.ac ? ' · AC connected' : ' · on battery'}")
+      (progress :class "batbar" :value {bat.cap} :orientation "h" :flipped false))
+    (box :class "batinfo" :orientation "v" :space-evenly false :spacing 3
+      (brow :k {bat.time_label} :v {bat.time})
+      (brow :k "Power draw" :v "${bat.power_w} W")
+      (brow :k "Voltage" :v "${bat.volt_v} V")
+      (brow :k "Energy" :v "${bat.energy_now_wh} / ${bat.energy_full_wh} Wh")
+      (brow :k "Design capacity" :v "${bat.energy_design_wh} Wh")
+      (brow :k "Health" :v "${bat.health}%")
+      (brow :k "Cycles" :v "${bat.cycles}")
+      (brow :k "Technology" :v {bat.tech})
+      (brow :k "Model" :v "${bat.mfr} ${bat.model}"))))
+
+;; ---------- bluetooth menu ----------
+(defwidget bt_device [d]
+  (box :class "dev ${d.connected ? 'connected' : ''}" :space-evenly false :spacing 6
+    (eventbox :hexpand true :cursor "pointer"
+              :onclick "~/.config/qtile/widgets/sidebar/scripts/bluetooth toggle ${d.mac} &"
+      (box :space-evenly false :spacing 10
+        (label :class "dicon" :text {d.icon})
+        (box :orientation "v" :space-evenly false :halign "start" :valign "center"
+          (label :class "dname" :halign "start" :limit-width 26 :text {d.name})
+          (label :class "dsub" :halign "start"
+                 :text {bt_busy == d.mac ? "working..." : (d.connected ? "Connected" : (d.paired ? "Paired" : "Available"))}))))
+    (eventbox :cursor "pointer" :visible {d.paired}
+              :tooltip "Forget device"
+              :onclick "~/.config/qtile/widgets/sidebar/scripts/bluetooth forget ${d.mac} &"
+      (label :class "forget" :text "󰆴"))))
+
+(defwidget bt_menu_w []
+  (box :class "btmenu" :orientation "v" :space-evenly false :spacing 8
+    (box :class "bthead" :space-evenly false :spacing 8
+      (label :class "bttitle" :halign "start" :hexpand true :text "󰂯  Bluetooth")
+      (eventbox :cursor "pointer" :onclick "~/.config/qtile/widgets/sidebar/scripts/bluetooth power &"
+        (label :class "btswitch ${bt.on ? 'on' : ''}" :text {bt.on ? "ON" : "OFF"})))
+    (eventbox :cursor "pointer" :visible {bt.on}
+              :onclick {bt_scanning ? "" : "~/.config/qtile/widgets/sidebar/scripts/bluetooth scan &"}
+      (label :class "btscan ${bt_scanning ? 'busy' : ''}" :text {bt_scanning ? "󰑐  Scanning..." : "󰑐  Scan for devices"}))
+    (scroll :vscroll true :hscroll false :height 260 :visible {bt.on}
+      (box :orientation "v" :space-evenly false :spacing 4
+        (label :class "btempty" :visible {arraylength(bt_devices) == 0}
+               :text "No devices. Press Scan.")
+        (for d in bt_devices (bt_device :d d))))
+    (label :class "btempty" :visible {!bt.on} :text "Bluetooth is off")))
+
 (defwidget bar_w []
   (centerbox :class "bar" :orientation "h"
     (box :halign "start" :space-evenly false :spacing 6 (workspaces_w) (system_w))
     (box :halign "center" (clock_w))
-    (box :halign "end" :space-evenly false (controls_w))))
+    (box :halign "end" :space-evenly false :spacing 6 (controls_w) (quick_w) (battery_w))))
 
 ;; ---------- window ----------
 (defwindow sidebar
@@ -83,3 +162,29 @@
   :wm-ignore false
   :reserve (struts :side "top" :distance "32px")
   (bar_w))
+
+(defwindow bluetooth_menu
+  :monitor 0
+  :geometry (geometry :x "8px" :y "38px" :width "340px" :anchor "top right")
+  :windowtype "dock"
+  :stacking "fg"
+  :wm-ignore false
+  (bt_menu_w))
+
+(defwindow battery_menu
+  :monitor 0
+  :geometry (geometry :x "8px" :y "38px" :width "320px" :anchor "top right")
+  :windowtype "dock"
+  :stacking "fg"
+  :wm-ignore false
+  (battery_menu_w))
+
+;; transparent layer behind the popups: any click closes them (starts below the bar)
+(defwindow popup_catcher
+  :monitor 0
+  :geometry (geometry :x "0px" :y "32px" :width "100%" :height "100%" :anchor "top left")
+  :windowtype "dock"
+  :stacking "fg"
+  :wm-ignore false
+  (eventbox :onclick "~/.config/qtile/widgets/sidebar/scripts/popup close &"
+    (box :class "catcher")))

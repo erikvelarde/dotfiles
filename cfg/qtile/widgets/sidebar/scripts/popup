@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# Open/close the bar popups. Only one is open at a time; a transparent
+# catcher window behind them closes everything when clicked.
+#   popup toggle bluetooth|battery | popup close
+cfg="$HOME/.config/qtile/widgets/sidebar"
+eww_() { eww -c "$cfg" "$@"; }
+
+is_open() { eww_ active-windows 2>/dev/null | grep -q "^$1:"; }
+
+close_all() {
+  eww_ close bluetooth_menu battery_menu popup_catcher >/dev/null 2>&1
+}
+
+case "$1" in
+  close) close_all ;;
+  toggle)
+    win="${2}_menu"
+    case "$2" in bluetooth|battery) ;; *) echo "usage: $0 toggle bluetooth|battery" >&2; exit 1 ;; esac
+    if is_open "$win"; then
+      close_all
+    else
+      close_all
+      [[ $2 == bluetooth ]] && eww_ update bt_devices="$("$cfg/scripts/bluetooth" list)"
+      # catcher first so it sits below the popup
+      eww_ open popup_catcher
+      eww_ open "$win"
+    fi
+    ;;
+  *) echo "usage: $0 toggle bluetooth|battery | close" >&2; exit 1 ;;
+esac

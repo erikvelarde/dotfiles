@@ -1,0 +1,107 @@
+#!/usr/bin/env bash
+# Bluetooth helper for the eww bar / menu. Prints JSON for the `status` and `list` commands.
+#   status | list | scan | power | toggle MAC | forget MAC
+cfg="$HOME/.config/qtile/widgets/sidebar"
+ICON_ON=$'\U000f00af'
+ICON_OFF=$'\U000f00b2'
+ICON_CONN=$'\U000f00b1'
+
+powered() { bluetoothctl show 2>/dev/null | grep -q 'Powered: yes'; }
+
+# device icon from the BlueZ "Icon" field
+dev_icon() {
+  case "$1" in
+    audio-headset|audio-headphones) printf '\U000f02cb' ;;
+    audio-card|audio-speakers)      printf '\U000f04c3' ;;
+    input-keyboard)                 printf '\U000f030c' ;;
+    input-mouse)                    printf '\U000f037d' ;;
+    input-gaming)                   printf '\U000f0eb5' ;;
+    phone)                          printf '\U000f011c' ;;
+    computer)                       printf '\U000f0322' ;;
+    *)                              printf '\U000f00af' ;;
+  esac
+}
+
+status() {
+  if ! powered; then
+    jq -nc --arg icon "$ICON_OFF" '{on: false, connected: 0, icon: $icon, name: ""}'
+    return
+  fi
+  local n name
+  n=$(bluetoothctl devices Connected 2>/dev/null | grep -c '^Device')
+  name=$(bluetoothctl devices Connected 2>/dev/null | head -n1 | cut -d' ' -f3-)
+  local icon=$ICON_ON
+  ((n > 0)) && icon=$ICON_CONN
+  jq -nc --arg icon "$icon" --arg name "$name" --argjson n "$n" \
+    '{on: true, connected: $n, icon: $icon, name: $name}'
+}
+
+list() {
+  powered || { echo '[]'; return; }
+  local mac name info paired connected icon
+  while read -r _ mac name; do
+    info=$(bluetoothctl info "$mac" 2>/dev/null)
+    paired=false; connected=false
+    grep -q 'Paired: yes' <<<"$info" && paired=true
+    grep -q 'Connected: yes' <<<"$info" && connected=true
+    # skip unnamed devices (name is just the MAC with dashes)
+    [[ ${name//-/:} == "$mac" ]] && continue
+    icon=$(dev_icon "$(awk '/Icon:/ {print $2}' <<<"$info")")
+    jq -nc --arg mac "$mac" --arg name "$name" --arg icon "$icon" \
+      --argjson paired "$paired" --argjson connected "$connected" \
+      '{mac: $mac, name: $name, icon: $icon, paired: $paired, connected: $connected}'
+  done < <(bluetoothctl devices 2>/dev/null) |
+    jq -sc 'sort_by([(.connected | not), (.paired | not), .name])'
+}
+
+refresh() {
+  eww -c "$cfg" update bt_devices="$(list)" >/dev/null 2>&1
+}
+
+case "$1" in
+  status) status ;;
+  list) list ;;
+  scan)
+    powered || bluetoothctl power on >/dev/null
+    eww -c "$cfg" update bt_scanning=true >/dev/null 2>&1
+    # refresh the list a few times while discovery runs
+    bluetoothctl --timeout 10 scan on >/dev/null 2>&1 &
+    scan_pid=$!
+    while kill -0 "$scan_pid" 2>/dev/null; do
+      sleep 2
+      refresh
+    done
+    refresh
+    eww -c "$cfg" update bt_scanning=false >/dev/null 2>&1
+    ;;
+  power)
+    if powered; then bluetoothctl power off >/dev/null; else bluetoothctl power on >/dev/null; fi
+    sleep 0.5
+    refresh
+    eww -c "$cfg" update bt="$(status)" >/dev/null 2>&1
+    ;;
+  toggle)
+    mac=$2
+    eww -c "$cfg" update bt_busy="$mac" >/dev/null 2>&1
+    info=$(bluetoothctl info "$mac" 2>/dev/null)
+    if grep -q 'Connected: yes' <<<"$info"; then
+      out=$(bluetoothctl disconnect "$mac" 2>&1)
+    else
+      if ! grep -q 'Paired: yes' <<<"$info"; then
+        bluetoothctl pair "$mac" >/dev/null 2>&1
+        bluetoothctl trust "$mac" >/dev/null 2>&1
+      fi
+      out=$(bluetoothctl connect "$mac" 2>&1)
+    fi
+    grep -qiE 'fail|error|not available' <<<"$out" &&
+      notify-send -u low "Bluetooth" "$(tail -n1 <<<"$out")"
+    eww -c "$cfg" update bt_busy="" >/dev/null 2>&1
+    refresh
+    eww -c "$cfg" update bt="$(status)" >/dev/null 2>&1
+    ;;
+  forget)
+    bluetoothctl remove "$2" >/dev/null 2>&1
+    refresh
+    ;;
+  *) echo "usage: $0 status|list|scan|power|toggle MAC|forget MAC" >&2; exit 1 ;;
+esac

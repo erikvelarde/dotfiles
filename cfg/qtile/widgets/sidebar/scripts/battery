@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+# Prints battery details from sysfs as JSON (no upower/acpi needed).
+bat=/sys/class/power_supply/BAT0
+ac=/sys/class/power_supply/ADP1
+
+rd() { cat "$bat/$1" 2>/dev/null; }
+
+if [[ ! -d $bat ]]; then
+  echo '{"present":false,"cap":0,"icon":"󰂑","status":"No battery","class":"off"}'
+  exit 0
+fi
+
+cap=$(rd capacity)
+status=$(rd status)
+volt=$(rd voltage_now)       # uV
+power=$(rd power_now)        # uW
+e_now=$(rd energy_now)       # uWh
+e_full=$(rd energy_full)
+e_design=$(rd energy_full_design)
+online=$(cat "$ac/online" 2>/dev/null || echo 0)
+
+ICONS=($'\U000f008e' $'\U000f007a' $'\U000f007b' $'\U000f007c' $'\U000f007d' $'\U000f007e' $'\U000f007f' $'\U000f0080' $'\U000f0081' $'\U000f0082' $'\U000f0079')
+case $status in
+  Charging)     icon=$'\U000f0084' ;;
+  Full)         icon=$'\U000f0085' ;;
+  *)            icon=${ICONS[$((cap / 10))]} ;;
+esac
+
+class=normal
+if [[ $status == Charging ]]; then class=charging
+elif (( cap <= 15 )); then class=critical
+elif (( cap <= 30 )); then class=low
+fi
+
+jq -nc \
+  --argjson present true \
+  --argjson cap "${cap:-0}" \
+  --arg status "$status" \
+  --arg icon "$icon" \
+  --arg class "$class" \
+  --argjson online "${online:-0}" \
+  --argjson volt "${volt:-0}" --argjson power "${power:-0}" \
+  --argjson e_now "${e_now:-0}" --argjson e_full "${e_full:-0}" --argjson e_design "${e_design:-0}" \
+  --argjson cycles "$(rd cycle_count || echo 0)" \
+  --arg tech "$(rd technology)" --arg model "$(rd model_name)" --arg mfr "$(rd manufacturer)" '
+  def hm($h): if $h <= 0 then "—" else "\(($h|floor))h \((($h - ($h|floor)) * 60 | floor))m" end;
+  ($power / 1e6) as $w
+  | {
+    present: $present, cap: $cap, status: $status, icon: $icon, class: $class,
+    ac: ($online == 1),
+    power_w: ($w * 10 | round / 10),
+    volt_v: ($volt / 1e5 | round / 10),
+    energy_now_wh: ($e_now / 1e5 | round / 10),
+    energy_full_wh: ($e_full / 1e5 | round / 10),
+    energy_design_wh: ($e_design / 1e5 | round / 10),
+    health: (if $e_design > 0 then ($e_full * 100 / $e_design | round) else 0 end),
+    cycles: $cycles, tech: $tech, model: $model, mfr: $mfr,
+    time: (if $w <= 0 then "—"
+           elif $status == "Discharging" then hm($e_now / $power)
+           elif $status == "Charging" then hm(($e_full - $e_now) / $power)
+           else "—" end),
+    time_label: (if $status == "Charging" then "Time to full" elif $status == "Discharging" then "Time remaining" else "Time" end)
+  }'

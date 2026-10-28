@@ -1,6 +1,5 @@
 bat
 ntfs-3g
-kitty
 ranger
 exa
 fzf
@@ -8,11 +7,9 @@ xdg-user-dirs
 rofi
 feh
 picom
-nitrogen
 ttf-nerd-fonts-symbols
 ttf-jetbrains-mono
 ttf-iosevka-nerd
-ghostty
 pavucontrol
 wget
 brightnessctl
@@ -22,7 +19,6 @@ network-manager-applet
 volumeicon
 cbatticon
 python-gobject
-python-pywlroots
 python-dbus-next
 hsetroot
 thunar
@@ -56,4 +52,3 @@ playerctl
 bc
 ripgrep
 evince
-obs-studio

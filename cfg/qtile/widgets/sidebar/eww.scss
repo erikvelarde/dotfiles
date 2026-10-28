@@ -87,8 +87,11 @@ $white: #dcdfe4;
 .bri  .icon { color: $yellow; }
 .vol  .icon { color: $green; }
 .wifi .icon { color: $blue; }
+.bt   .icon { color: $blue; }
+.bt.connected .icon { color: $cyan; }
 .vol.muted .icon, .vol.muted .val,
-.wifi.off .icon, .wifi.off .val { color: $red; }
+.wifi.off .icon, .wifi.off .val,
+.bt.off .icon { color: $red; }
 
 .stat:hover .icon, .stat:hover .val { color: $white; }
 
@@ -99,3 +102,77 @@ tooltip {
   padding: 4px 8px;
 }
 tooltip label { color: $white; }
+
+// ---------- bluetooth menu ----------
+.btmenu {
+  background-color: $bg;
+  border: 1px solid $track;
+  border-radius: 12px;
+  padding: 12px;
+}
+.bttitle { font-size: 14px; color: $white; }
+.btswitch {
+  background-color: $track;
+  border-radius: 8px;
+  padding: 2px 10px;
+  color: $red;
+}
+.btswitch.on { color: $green; }
+.btscan {
+  background-color: $surface;
+  border-radius: 8px;
+  padding: 6px 10px;
+  color: $cyan;
+}
+.btscan:hover { background-color: $track; }
+.btscan.busy { color: $yellow; }
+.dev {
+  background-color: $surface;
+  border-radius: 8px;
+  padding: 6px 10px;
+}
+.dev:hover { background-color: $track; }
+.dev.connected { border-left: 3px solid $cyan; }
+.dicon { font-family: "Symbols Nerd Font"; font-size: 18px; color: $blue; }
+.dev.connected .dicon { color: $cyan; }
+.dname { color: $white; }
+.dsub { font-size: 10px; color: $dim; }
+.forget { font-family: "Symbols Nerd Font"; color: $dim; padding: 0 4px; }
+.forget:hover { color: $red; }
+.btempty { color: $dim; padding: 14px 0; }
+
+// ---------- battery ----------
+.battery .icon { color: $green; }
+.battery.charging .icon { color: $cyan; }
+.battery.low .icon, .battery.low .val { color: $yellow; }
+.battery.critical .icon, .battery.critical .val { color: $red; }
+.battery:hover .val { color: $white; }
+
+.batmenu {
+  background-color: $bg;
+  border: 1px solid $track;
+  border-radius: 12px;
+  padding: 12px;
+}
+.batbig { background-color: $surface; border-radius: 8px; padding: 10px; }
+.batpct { font-size: 30px; color: $white; }
+.batstate { color: $dim; }
+.batbar { margin-top: 6px; }
+.batbar trough {
+  background-color: $track;
+  border-radius: 6px;
+  min-height: 8px;
+}
+.batbar progress {
+  background-color: $green;
+  border-radius: 6px;
+  min-height: 8px;
+}
+.batmenu.charging .batbar progress { background-color: $cyan; }
+.batmenu.low .batbar progress { background-color: $yellow; }
+.batmenu.critical .batbar progress { background-color: $red; }
+.batinfo { background-color: $surface; border-radius: 8px; padding: 8px 10px; }
+.bk { color: $dim; }
+.bv { color: $white; }
+
+.catcher { background-color: rgba(0, 0, 0, 0); }
