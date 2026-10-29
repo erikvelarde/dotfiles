@@ -1,0 +1,106 @@
+/**
+ * Rofi theme: "save or paste only" prompt shown after taking a screenshot.
+ * Based on the powermenu/confirm theme.
+ **/
+
+configuration {
+    show-icons:                 false;
+}
+
+@import                          "shared/colors.rasi"
+@import                          "shared/fonts.rasi"
+
+window {
+    transparency:                "real";
+    location:                    center;
+    anchor:                      center;
+    fullscreen:                  false;
+    width:                       560px;
+    margin:                      0px;
+    padding:                     0px;
+    border:                      4px solid;
+    border-radius:               0px;
+    border-color:                @background-alt;
+    cursor:                      "default";
+    background-color:            @background;
+}
+
+mainbox {
+    enabled:                     true;
+    spacing:                     16px;
+    margin:                      0px;
+    padding:                     20px;
+    background-color:            transparent;
+    children:                    [ "inputbar", "message", "listview" ];
+}
+
+inputbar {
+    enabled:                     true;
+    spacing:                     10px;
+    padding:                     0px;
+    background-color:            transparent;
+    text-color:                  @foreground;
+    children:                    [ "textbox-prompt-colon", "prompt" ];
+}
+textbox-prompt-colon {
+    enabled:                     true;
+    expand:                      false;
+    str:                         "󰹑";
+    padding:                     6px 12px;
+    background-color:            @active;
+    text-color:                  @background;
+}
+prompt {
+    enabled:                     true;
+    padding:                     6px 12px;
+    background-color:            @selected;
+    text-color:                  @background;
+}
+
+message {
+    enabled:                     true;
+    margin:                      0px;
+    padding:                     10px;
+    background-color:            @background-alt;
+    text-color:                  @foreground;
+}
+textbox {
+    background-color:            inherit;
+    text-color:                  inherit;
+    vertical-align:              0.5;
+    horizontal-align:            0.5;
+}
+
+listview {
+    enabled:                     true;
+    columns:                     2;
+    lines:                       1;
+    cycle:                       true;
+    scrollbar:                   false;
+    layout:                      vertical;
+    spacing:                     14px;
+    background-color:            transparent;
+    cursor:                      "default";
+}
+
+element {
+    enabled:                     true;
+    padding:                     22px 10px;
+    border-radius:               0px;
+    background-color:            @background-alt;
+    text-color:                  @foreground;
+    cursor:                      pointer;
+}
+element-text {
+    font:                        "Iosevka Nerd Font 13";
+    background-color:            transparent;
+    text-color:                  inherit;
+    cursor:                      inherit;
+    vertical-align:              0.5;
+    horizontal-align:            0.5;
+    markup:                      true;
+}
+element selected.normal {
+    background-color:            @active;
+    text-color:                  @background;
+}

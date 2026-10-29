@@ -81,8 +81,8 @@ keys = [
     Key(
         [mod],
         "s",
-        lazy.spawn(rofi_applets + "rofi_screenshot"),
-        desc="Run screenshot applet",
+        lazy.spawn(screenshot + " --ask"),
+        desc="Screenshot area, then ask save or paste only",
     ),
     # Function keys : Brightness --
     Key(
@@ -126,9 +126,9 @@ keys = [
     Key([], "F9", lazy.spawn("playerctl play-pause"), desc="Toggle play/pause"),
     Key([], "F10", lazy.spawn("playerctl next"), desc="Next track"),
     # Screenshots --
-    Key([], "Print", 
-        lazy.spawn(rofi_applets + "rofi_screenshot"),
-         desc="Take Screenshot"),
+    Key([], "Print",
+        lazy.spawn(screenshot + " --ask"),
+         desc="Screenshot area, then ask save or paste only"),
     Key(
         ["control"],
         "Print",

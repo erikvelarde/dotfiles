@@ -83,8 +83,43 @@ shotarea_dontsave () {
 	delete_pic
 }
 
+# select area, copy to clipboard, then ask: save to disk or paste only
+shotarea_ask () {
+	tmp=$(mktemp --suffix=.png)
+	trap 'rm -f "$tmp"' EXIT
+	maim -u -f png -s -b 2 -c 0.35,0.55,0.85,0.25 -l > "$tmp" || exit 0
+	[[ -s "$tmp" ]] || exit 0
+	xclip -selection clipboard -t image/png < "$tmp"
+	paplay /usr/share/sounds/freedesktop/stereo/screen-capture.oga &>/dev/null &
+
+	dims=$(file -b "$tmp" | grep -oE '[0-9]+ x [0-9]+' | tr -d ' ')
+	size=$(du -h "$tmp" | cut -f1)
+	mesg="Copied to clipboard  ·  ${dims}  ·  ${size}
+<span size='small'>[S] save    [P] paste only    [Esc] paste only</span>"
+	save_opt="<span size='160%'>󰆓</span>  Save"
+	paste_opt="<span size='160%'>󰆏</span>  Paste only"
+
+	choice=$(printf '%s|%s' "$save_opt" "$paste_opt" | rofi -dmenu -sep '|' -i -p 'Screenshot' \
+		-mesg "$mesg" -markup-rows -no-custom -format i \
+		-kb-custom-1 's' -kb-custom-2 'p' \
+		-theme "$HOME/.config/qtile/rofi/screenshot_ask.rasi")
+	rc=$?
+	[[ $rc -eq 10 ]] && choice=0
+	[[ $rc -eq 11 ]] && choice=1
+
+	notify_cmd_shot='dunstify -u low -h string:x-dunst-stack-tag:obscreenshot'
+	if [[ "$choice" == "0" ]]; then
+		cp "$tmp" "${dir}/${file}"
+		${notify_cmd_shot} -i "${dir}/${file}" "Screenshot saved" "${file}"
+	else
+		${notify_cmd_shot} -i "$tmp" "Copied to clipboard"
+	fi
+}
+
 # execute
-if [[ "$1" == "--now" ]]; then
+if [[ "$1" == "--ask" ]]; then
+	shotarea_ask
+elif [[ "$1" == "--now" ]]; then
 	shotnow
 elif [[ "$1" == "--in5" ]]; then
 	shot5
