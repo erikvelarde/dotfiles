@@ -6,6 +6,4 @@ return {
 	---@module 'render-markdown'
 	---@type render.md.UserConfig
 	opts = {},
-	-- TODO: Implement a feature to integrate image preview or at least
-	-- just attach images inside the obsidian notes.
 }
