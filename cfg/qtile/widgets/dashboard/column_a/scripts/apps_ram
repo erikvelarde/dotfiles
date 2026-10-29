@@ -6,7 +6,7 @@
 # if [ -n "$firefox_pid" ]; then
 #     rss=$(ps -o rss= -p $firefox_pid)
 #
-#     rss_mb=$(echo "scale=2; $rss / 1024" | bc)
+#     rss_mb=$(echo "scale=2; $rss * 1.024 / 1000" | bc)
 #
 #     echo "Memory usage for firefox: ${rss_mb} MB"
 # fi
@@ -17,10 +17,10 @@ case "$1" in
     total_memory=0
     for pid in "${kitty_pids[@]}"; do
         rss=$(ps -o rss= -p $pid)
-        rss_mb=$(echo "scale=2; $rss / 1024" | bc)
+        rss_mb=$(echo "scale=2; $rss * 1.024 / 1000" | bc)
         total_memory=$(echo "$total_memory + $rss" | bc)
     done
-    total_memory_mb=$(echo "scale=2; $total_memory / 1024" | bc)
+    total_memory_mb=$(echo "scale=2; $total_memory * 1.024 / 1000" | bc)
     echo "${total_memory_mb} MB"
     ;;
   --vim)
@@ -28,10 +28,10 @@ case "$1" in
     total_memory=0
     for pid in "${vim_pids[@]}"; do
         rss=$(ps -o rss= -p $pid)
-        rss_mb=$(echo "scale=2; $rss / 1024" | bc)
+        rss_mb=$(echo "scale=2; $rss * 1.024 / 1000" | bc)
         total_memory=$(echo "$total_memory + $rss" | bc)
     done
-    total_memory_mb=$(echo "scale=2; $total_memory / 1024" | bc)
+    total_memory_mb=$(echo "scale=2; $total_memory * 1.024 / 1000" | bc)
     echo "${total_memory_mb} MB"
     ;;
   --firefox)
@@ -39,10 +39,10 @@ case "$1" in
     total_memory=0
     for pid in "${firefox_pids[@]}"; do
         rss=$(ps -o rss= -p $pid)
-        rss_mb=$(echo "scale=2; $rss / 1024" | bc)
+        rss_mb=$(echo "scale=2; $rss * 1.024 / 1000" | bc)
         total_memory=$(echo "$total_memory + $rss" | bc)
     done
-    total_memory_mb=$(echo "scale=2; $total_memory / 1024" | bc)
+    total_memory_mb=$(echo "scale=2; $total_memory * 1.024 / 1000" | bc)
     echo "${total_memory_mb} MB"
     ;;
   *)

@@ -22,7 +22,7 @@ if [[ -n $iface ]]; then
   if [[ -r $state ]]; then
     read -r t0 rx0 tx0 <"$state"
     dt=$((now - t0))
-    if ((dt > 0)); then down=$(((rx - rx0) / dt / 1024)); up=$(((tx - tx0) / dt / 1024)); fi
+    if ((dt > 0)); then down=$(((rx - rx0) / dt / 1000)); up=$(((tx - tx0) / dt / 1000)); fi
     ((down < 0)) && down=0; ((up < 0)) && up=0
   fi
   echo "$now $rx $tx" >"$state"

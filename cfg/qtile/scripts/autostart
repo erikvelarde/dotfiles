@@ -9,6 +9,7 @@ qdir="$HOME/.config/qtile"
 picom &
 udiskie -t &
 nm-applet &
+pkill -f scripts/bt_volume; "$qdir"/scripts/bt_volume &
 
 # audio server (needed for bluetooth audio devices: A2DP/HFP)
 systemctl --user start pipewire.socket pipewire-pulse.socket wireplumber.service

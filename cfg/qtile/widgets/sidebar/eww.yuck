@@ -55,7 +55,7 @@
   (box :class "module stats" :space-evenly false :spacing 12
     (stat :class "ram" :icon ""
           :value {EWW_RAM.used_mem_perc} :text "${round(EWW_RAM.used_mem_perc, 0)}%"
-          :tip "RAM ${round(EWW_RAM.used_mem / 1073741824, 1)} / ${round(EWW_RAM.total_mem / 1073741824, 1)} GB"
+          :tip "RAM ${round(EWW_RAM.used_mem / 1000000000, 1)} / ${round(EWW_RAM.total_mem / 1000000000, 1)} GB"
           :onclick "alacritty -e htop &" :onrightclick "" :onscroll "")
     (stat :class "cpu" :icon "󰍛"
           :value {EWW_CPU.avg} :text "${round(EWW_CPU.avg, 0)}%"
@@ -63,7 +63,7 @@
           :onclick "alacritty -e htop &" :onrightclick "" :onscroll "")
     (stat :class "disk" :icon "󰋊"
           :value {EWW_DISK["/"].used_perc} :text "${round(EWW_DISK["/"].used_perc, 0)}%"
-          :tip "Disk / ${round(EWW_DISK["/"].used / 1073741824, 0)} / ${round(EWW_DISK["/"].total / 1073741824, 0)} GB"
+          :tip "Disk / ${round(EWW_DISK["/"].used / 1000000000, 0)} / ${round(EWW_DISK["/"].total / 1000000000, 0)} GB"
           :onclick "" :onrightclick "" :onscroll "")))
 
 (defwidget controls_w []
@@ -254,7 +254,7 @@
                 (brow :k "Kernel" :v {sysinfo.kernel})
                 (brow :k "Uptime" :v {sysinfo.uptime})
                 (brow :k "CPU" :v "${round(EWW_CPU.avg, 0)}%  ·  ${sysinfo.mhz} MHz")
-                (brow :k "RAM" :v "${round(EWW_RAM.used_mem_perc, 0)}%  ·  ${round(EWW_RAM.used_mem / 1073741824, 1)} / ${round(EWW_RAM.total_mem / 1073741824, 1)} GB")
+                (brow :k "RAM" :v "${round(EWW_RAM.used_mem_perc, 0)}%  ·  ${round(EWW_RAM.used_mem / 1000000000, 1)} / ${round(EWW_RAM.total_mem / 1000000000, 1)} GB")
                 (brow :k "Disk /" :v "${round(EWW_DISK["/"].used_perc, 0)}%"))
               (box :orientation "v" :space-evenly false :spacing 3
                 (brow :k "CPU temp" :v "${sysinfo.cpu_t}°C")

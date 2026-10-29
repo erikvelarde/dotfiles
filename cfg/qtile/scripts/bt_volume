@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Sets every newly connected bluetooth audio sink to LEVEL% volume.
+LEVEL=20
+
+until pactl info >/dev/null 2>&1; do sleep 1; done
+
+pactl subscribe | grep --line-buffered "'new' on sink " | while read -r _; do
+  sleep 1  # let the sink finish appearing
+  pactl list short sinks | awk '/bluez_output/ {print $2}' | while read -r sink; do
+    pactl set-sink-volume "$sink" "${LEVEL}%"
+  done
+done
