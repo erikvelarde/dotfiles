@@ -1,0 +1,85 @@
+#!/usr/bin/env bash
+# Called by dunst for every notification (see qtile/dunstrc): dunst only records them,
+# the popups are drawn by eww. Env: DUNST_APP_NAME, SUMMARY, BODY, ICON_PATH, URGENCY,
+# ID, PROGRESS, STACK_TAG, TIMEOUT.
+cfg="$HOME/.config/qtile/widgets/sidebar"
+ctl="$cfg/scripts/notify_ctl"
+dir="${XDG_CACHE_HOME:-$HOME/.cache}/eww-notif"
+mkdir -p "$dir"
+[[ -s $dir/popups.json ]] || echo '[]' >"$dir/popups.json"
+[[ -s $dir/history.json ]] || echo '[]' >"$dir/history.json"
+
+app=$DUNST_APP_NAME summary=$DUNST_SUMMARY body=$DUNST_BODY tag=$DUNST_STACK_TAG
+urgency=${DUNST_URGENCY,,}
+# the label cannot wrap inside a fixed-width card, so wrap here (max 3 lines)
+body=$(fold -s -w 40 <<<"$body" | head -n 3)
+icon=$DUNST_ICON_PATH
+# callers point at icons that may not exist (eww errors on a missing file) -> use the glyph
+has_icon=true
+if [[ ! -f $icon ]]; then
+  has_icon=false
+  # eww errors on an empty path too, so hand it a 1x1 transparent png
+  icon="$dir/blank.png"
+  [[ -f $icon ]] || base64 -d >"$icon" <<<"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVR4nGNgAAIAAAUAAXpeqz8AAAAASUVORK5CYII="
+fi
+
+kind=message progress=-1
+case "$tag" in obvolume|obbacklight) kind=progress ;; esac
+if [[ ${DUNST_PROGRESS:--1} -ge 0 ]] 2>/dev/null; then kind=progress progress=$DUNST_PROGRESS; fi
+if [[ $kind == progress && $progress -lt 0 ]]; then
+  # volume / brightness scripts only put the value in the text: "Volume : 76%"
+  progress=$(grep -o '[0-9]\+' <<<"$summary $body" | head -n1)
+  progress=${progress:-0}
+fi
+
+# Nerd Font glyph used when the notification carries no icon
+lower=${app,,}" ${tag,,} ${summary,,}"
+case "$lower" in
+  *whatsapp*)   glyph=$'\U000f05a3' ;;
+  *telegram*)   glyph=$'\U000f0501' ;;
+  *discord*)    glyph=$'\U000f066f' ;;
+  *obvolume*)   glyph=$'\U000f057e' ;;
+  *obbacklight*) glyph=$'\U000f00e0' ;;
+  *screenshot*) glyph=$'\U000f0e51' ;;
+  *colorpicker*) glyph=$'\U000f020a' ;;
+  *spotify*|*music*) glyph=$'\U000f04c7' ;;
+  *mail*|*thunderbird*) glyph=$'\U000f01f0' ;;
+  *firefox*)    glyph=$'\U000f0239' ;;
+  *battery*|*power*) glyph=$'\U000f0079' ;;
+  *)            glyph=$'\U000f009a' ;;
+esac
+
+uid=$(date +%s%N)
+case "$kind:$urgency" in
+  progress:*)   secs=2 ;;
+  *:critical)   secs=0 ;;
+  *:low)        secs=3 ;;
+  *)            secs=6 ;;
+esac
+
+n=$(jq -nc --arg uid "$uid" --arg app "$app" --arg summary "$summary" --arg body "$body" \
+  --arg icon "$icon" --argjson has_icon "$has_icon" --arg urgency "$urgency" --arg tag "$tag" --arg kind "$kind" \
+  --arg glyph "$glyph" --arg time "$(date +%H:%M)" --argjson progress "$progress" \
+  '{uid: $uid, app: $app, summary: $summary, body: $body, icon: $icon, has_icon: $has_icon, urgency: $urgency,
+    tag: $tag, kind: $kind, glyph: $glyph, time: $time, progress: $progress}')
+
+(
+  flock 9
+  # popup: a repeated tag (volume keys) replaces the card instead of stacking
+  if [[ ! -e $dir/dnd || $urgency == critical ]]; then
+    jq -c --argjson n "$n" '[$n] + map(select(($n.tag == "" or .tag != $n.tag))) | .[:4]' \
+      "$dir/popups.json" >"$dir/popups.json.tmp" && mv "$dir/popups.json.tmp" "$dir/popups.json"
+  fi
+  # center: keep messages only (not volume / brightness ticks)
+  if [[ $kind != progress ]]; then
+    jq -c --argjson n "$n" '[$n] + . | .[:100]' "$dir/history.json" >"$dir/history.json.tmp" \
+      && mv "$dir/history.json.tmp" "$dir/history.json"
+  fi
+) 9>"$dir/lock"
+
+"$ctl" push
+
+if ((secs > 0)); then
+  # drop the popup after its time; a replaced card has a new uid so it is not touched
+  setsid -f bash -c 'sleep "$1"; "$2" dismiss_popup "$3"' _ "$secs" "$ctl" "$uid" >/dev/null 2>&1 </dev/null
+fi

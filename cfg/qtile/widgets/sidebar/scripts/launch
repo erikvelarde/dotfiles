@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# launch <music|browser|terminal|files>; apps open on their workspace
+go() { qtile cmd-obj -o group "$1" -f toscreen; }
+case "$1" in
+  music)    go 4; brave --new-window https://www.youtube.com >/dev/null 2>&1 & ;;
+  youtube)  go 4; brave --new-window https://www.youtube.com >/dev/null 2>&1 & ;;
+  browser)  go 2; brave >/dev/null 2>&1 & ;;
+  terminal) alacritty >/dev/null 2>&1 & ;;
+  files)    thunar >/dev/null 2>&1 & ;;
+esac
+~/.config/qtile/widgets/sidebar/scripts/popup close >/dev/null 2>&1

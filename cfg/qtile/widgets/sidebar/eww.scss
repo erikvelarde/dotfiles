@@ -16,7 +16,7 @@ $white: #dcdfe4;
   all: unset;
   font-family: "JetBrains Mono", "Symbols Nerd Font";
   font-weight: bold;
-  font-size: 12px;
+  font-size: 14px;
   color: $fg;
 }
 
@@ -68,7 +68,7 @@ $white: #dcdfe4;
 .ws.occupied:hover .pill { background-color: $white; }
 
 // ---------- clock ----------
-.clock .hour, .clock .min { font-size: 13px; }
+.clock .hour, .clock .min { font-size: 15px; }
 .clock .hour { color: $white; }
 .clock .sep  { color: $dim; }
 .clock .min  { color: $cyan; }
@@ -77,7 +77,7 @@ $white: #dcdfe4;
 // ---------- stats ----------
 .icon {
   font-family: "Symbols Nerd Font";
-  font-size: 15px;
+  font-size: 17px;
 }
 .val { color: $white; }
 
@@ -176,3 +176,110 @@ tooltip label { color: $white; }
 .bv { color: $white; }
 
 .catcher { background-color: rgba(0, 0, 0, 0); }
+.dbat { font-family: "Symbols Nerd Font"; color: $green; padding: 0 4px; }
+.dbat.low { color: $yellow; }
+.dbat.critical { color: $red; }
+
+// ---------- settings overlay ----------
+.gear .icon { color: $fg; }
+.gear:hover .icon { color: $white; }
+
+.settings_overlay { background-color: rgba(15, 16, 19, 0.78); }
+.scard {
+  background-color: rgba(28, 31, 38, 0.92);
+  border: 1px solid $track;
+  border-radius: 12px;
+  padding: 14px;
+  min-width: 340px;
+}
+.stitle { font-size: 14px; color: $white; }
+.sicon { font-family: "Symbols Nerd Font"; font-size: 18px; color: $cyan; }
+.sicon.muted { color: $red; }
+.sscale trough {
+  background-color: $track;
+  border-radius: 6px;
+  min-height: 8px;
+}
+.sscale highlight {
+  background-color: $cyan;
+  border-radius: 6px;
+}
+.sscale slider {
+  background-color: $white;
+  border-radius: 8px;
+  min-width: 14px;
+  min-height: 14px;
+  margin: -4px;
+}
+
+// ---------- notifications ----------
+.bell .icon { color: $fg; }
+.bell.unread .icon { color: $yellow; }
+.bell.dnd .icon { color: $red; }
+.bell:hover .icon { color: $white; }
+.ncount { font-size: 11px; color: $yellow; }
+
+.npopups { padding: 2px; }
+.nmenu {
+  background-color: $bg;
+  border: 1px solid $track;
+  border-radius: 12px;
+  padding: 12px;
+}
+.ncard {
+  background-color: $surface;
+  border: 1px solid $track;
+  border-left: 3px solid $cyan;
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+.npopups .ncard {
+  background-color: rgba(15, 16, 19, 0.95);
+}
+.ncard:hover { background-color: $track; }
+.ncard.low { border-left-color: $dim; }
+.ncard.critical { border-left-color: $red; }
+.ncard.progress { border-left-color: $green; }
+
+.nicon-wrap { min-width: 34px; min-height: 34px; }
+.nglyph { font-family: "Symbols Nerd Font"; font-size: 22px; color: $cyan; }
+.ncard.progress .nglyph { color: $green; }
+.ncard.critical .nglyph { color: $red; }
+.napp { font-size: 10px; color: $dim; }
+.ntime { font-size: 10px; color: $dim; }
+.nsum { font-size: 13px; color: $white; }
+.nbody { color: $fg; }
+.nclose { font-family: "Symbols Nerd Font"; color: $dim; padding: 0 2px; }
+.nclose:hover { color: $red; }
+.nprog { margin-top: 2px; }
+.nval { color: $white; min-width: 38px; }
+.nbar trough {
+  background-color: $track;
+  border-radius: 6px;
+  min-height: 8px;
+}
+.nbar progress {
+  background-color: $green;
+  border-radius: 6px;
+  min-height: 8px;
+}
+
+// ---------- settings overlay: larger type + launcher ----------
+.settings_overlay label { font-size: 15px; }
+.settings_overlay .stitle { font-size: 17px; }
+.settings_overlay .sicon { font-size: 22px; }
+.settings_overlay .btswitch, .settings_overlay .btscan { font-size: 14px; padding: 6px 12px; }
+.settings_overlay .dsub, .settings_overlay .dname { font-size: 14px; }
+.settings_overlay .scard { min-width: 380px; padding: 16px; }
+
+.launcher {
+  background-color: rgba(28, 31, 38, 0.92);
+  border: 1px solid $track;
+  border-radius: 12px;
+  padding: 10px;
+}
+.stile { border-radius: 10px; padding: 10px 8px; }
+.stile:hover { background-color: $track; }
+.settings_overlay .stileicon { font-family: "Symbols Nerd Font"; font-size: 30px; color: $cyan; }
+.settings_overlay .stiletext { font-size: 13px; color: $fg; }
+.stile:hover .stileicon, .stile:hover .stiletext { color: $white; }

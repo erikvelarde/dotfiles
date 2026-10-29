@@ -118,10 +118,13 @@ keys = [
         desc="Toggle mute for mic",
     ),
     # Function keys : Media --
-    Key([], "XF86AudioNext", lazy.spawn("mpc next"), desc="Next track"),
-    Key([], "XF86AudioPrev", lazy.spawn("mpc prev"), desc="Previous track"),
-    Key([], "XF86AudioPlay", lazy.spawn("mpc toggle"), desc="Toggle play/pause"),
-    Key([], "XF86AudioStop", lazy.spawn("mpc stop"), desc="Stop playing"),
+    Key([], "XF86AudioNext", lazy.spawn("playerctl next"), desc="Next track"),
+    Key([], "XF86AudioPrev", lazy.spawn("playerctl previous"), desc="Previous track"),
+    Key([], "XF86AudioPlay", lazy.spawn("playerctl play-pause"), desc="Toggle play/pause"),
+    Key([], "XF86AudioStop", lazy.spawn("playerctl stop"), desc="Stop playing"),
+    Key([], "F8", lazy.spawn("playerctl previous"), desc="Previous track"),
+    Key([], "F9", lazy.spawn("playerctl play-pause"), desc="Toggle play/pause"),
+    Key([], "F10", lazy.spawn("playerctl next"), desc="Next track"),
     # Screenshots --
     Key([], "Print", 
         lazy.spawn(rofi_applets + "rofi_screenshot"),

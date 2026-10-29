@@ -22,23 +22,32 @@ dev_icon() {
   esac
 }
 
+# battery percent from `bluetoothctl info` output, -1 when the device does not report one
+dev_battery() {
+  local b
+  b=$(sed -n 's/.*Battery Percentage:.*(\([0-9]*\)).*/\1/p' <<<"$1")
+  echo "${b:--1}"
+}
+
 status() {
   if ! powered; then
-    jq -nc --arg icon "$ICON_OFF" '{on: false, connected: 0, icon: $icon, name: ""}'
+    jq -nc --arg icon "$ICON_OFF" '{on: false, connected: 0, icon: $icon, name: "", battery: -1}'
     return
   fi
-  local n name
+  local n name mac battery=-1
   n=$(bluetoothctl devices Connected 2>/dev/null | grep -c '^Device')
   name=$(bluetoothctl devices Connected 2>/dev/null | head -n1 | cut -d' ' -f3-)
+  mac=$(bluetoothctl devices Connected 2>/dev/null | head -n1 | cut -d' ' -f2)
+  [[ -n $mac ]] && battery=$(dev_battery "$(bluetoothctl info "$mac" 2>/dev/null)")
   local icon=$ICON_ON
   ((n > 0)) && icon=$ICON_CONN
-  jq -nc --arg icon "$icon" --arg name "$name" --argjson n "$n" \
-    '{on: true, connected: $n, icon: $icon, name: $name}'
+  jq -nc --arg icon "$icon" --arg name "$name" --argjson n "$n" --argjson battery "$battery" \
+    '{on: true, connected: $n, icon: $icon, name: $name, battery: $battery}'
 }
 
 list() {
   powered || { echo '[]'; return; }
-  local mac name info paired connected icon
+  local mac name info paired connected icon battery
   while read -r _ mac name; do
     info=$(bluetoothctl info "$mac" 2>/dev/null)
     paired=false; connected=false
@@ -46,10 +55,11 @@ list() {
     grep -q 'Connected: yes' <<<"$info" && connected=true
     # skip unnamed devices (name is just the MAC with dashes)
     [[ ${name//-/:} == "$mac" ]] && continue
+    battery=$(dev_battery "$info")
     icon=$(dev_icon "$(awk '/Icon:/ {print $2}' <<<"$info")")
     jq -nc --arg mac "$mac" --arg name "$name" --arg icon "$icon" \
-      --argjson paired "$paired" --argjson connected "$connected" \
-      '{mac: $mac, name: $name, icon: $icon, paired: $paired, connected: $connected}'
+      --argjson paired "$paired" --argjson connected "$connected" --argjson battery "$battery" \
+      '{mac: $mac, name: $name, icon: $icon, paired: $paired, connected: $connected, battery: $battery}'
   done < <(bluetoothctl devices 2>/dev/null) |
     jq -sc 'sort_by([(.connected | not), (.paired | not), .name])'
 }

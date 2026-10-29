@@ -5,6 +5,7 @@ cfg="$HOME/.config/qtile/widgets/sidebar"
 start() {
   pkill -x polybar
   eww -c "$cfg" open sidebar
+  "$cfg/scripts/notify_ctl" init &
 }
 
 case "$1" in

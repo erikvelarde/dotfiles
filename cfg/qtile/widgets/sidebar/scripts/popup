@@ -1,30 +1,40 @@
 #!/usr/bin/env bash
 # Open/close the bar popups. Only one is open at a time; a transparent
 # catcher window behind them closes everything when clicked.
-#   popup toggle bluetooth|battery | popup close
+#   popup toggle bluetooth|battery|settings|notifications | popup close
 cfg="$HOME/.config/qtile/widgets/sidebar"
 eww_() { eww -c "$cfg" "$@"; }
 
 is_open() { eww_ active-windows 2>/dev/null | grep -q "^$1:"; }
 
 close_all() {
-  eww_ close bluetooth_menu battery_menu popup_catcher >/dev/null 2>&1
+  eww_ update settings_open=false >/dev/null 2>&1
+  eww_ close bluetooth_menu battery_menu settings_menu notifications_menu popup_catcher >/dev/null 2>&1
 }
 
 case "$1" in
   close) close_all ;;
   toggle)
     win="${2}_menu"
-    case "$2" in bluetooth|battery) ;; *) echo "usage: $0 toggle bluetooth|battery" >&2; exit 1 ;; esac
+    case "$2" in bluetooth|battery|settings|notifications) ;; *) echo "usage: $0 toggle bluetooth|battery|settings|notifications" >&2; exit 1 ;; esac
     if is_open "$win"; then
       close_all
     else
       close_all
       [[ $2 == bluetooth ]] && eww_ update bt_devices="$("$cfg/scripts/bluetooth" list)"
-      # catcher first so it sits below the popup
-      eww_ open popup_catcher
+      [[ $2 == notifications ]] && "$cfg/scripts/notify_ctl" push
+      if [[ $2 == settings ]]; then
+        # the overlay catches outside clicks itself
+        eww_ update audio_sinks="$("$cfg/scripts/audio" list sinks)" \
+          audio_sources="$("$cfg/scripts/audio" list sources)" \
+          mic_muted="$("$cfg/scripts/audio" mic)" \
+          bt_devices="$("$cfg/scripts/bluetooth" list)" settings_open=true
+      else
+        # catcher first so it sits below the popup
+        eww_ open popup_catcher
+      fi
       eww_ open "$win"
     fi
     ;;
-  *) echo "usage: $0 toggle bluetooth|battery | close" >&2; exit 1 ;;
+  *) echo "usage: $0 toggle bluetooth|battery|settings|notifications | close" >&2; exit 1 ;;
 esac

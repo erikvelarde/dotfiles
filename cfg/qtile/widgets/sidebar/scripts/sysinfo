@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+# Prints laptop/system/network details as JSON for the settings overlay.
+state="${XDG_RUNTIME_DIR:-/tmp}/eww-sysinfo-net"
+
+hw() { # hwmon name -> dir
+  local d; for d in /sys/class/hwmon/hwmon*; do [[ $(<"$d/name") == "$1" ]] && { echo "$d"; return; }; done
+}
+temp() { [[ -n $1 && -r $1/temp1_input ]] && echo $(($(<"$1/temp1_input") / 1000)) || echo 0; }
+
+cpu_t=$(temp "$(hw k10temp)")
+gpu_t=$(temp "$(hw amdgpu)")
+nvme_t=$(temp "$(hw nvme)")
+fan=$(cat /sys/class/hwmon/hwmon*/fan1_input 2>/dev/null | head -n1)
+mhz=$(awk -F: '/cpu MHz/ { s += $2; n++ } END { printf "%d", n ? s / n : 0 }' /proc/cpuinfo)
+
+iface=$(ip route show default 2>/dev/null | awk '{ print $5; exit }')
+ip=""; down=0; up=0
+if [[ -n $iface ]]; then
+  ip=$(ip -4 -o addr show dev "$iface" scope global | awk '{ sub(/\/.*/, "", $4); print $4; exit }')
+  rx=$(<"/sys/class/net/$iface/statistics/rx_bytes"); tx=$(<"/sys/class/net/$iface/statistics/tx_bytes")
+  now=$(date +%s)
+  if [[ -r $state ]]; then
+    read -r t0 rx0 tx0 <"$state"
+    dt=$((now - t0))
+    if ((dt > 0)); then down=$(((rx - rx0) / dt / 1024)); up=$(((tx - tx0) / dt / 1024)); fi
+    ((down < 0)) && down=0; ((up < 0)) && up=0
+  fi
+  echo "$now $rx $tx" >"$state"
+fi
+
+up_s=$(awk '{ printf "%dd %dh %dm", $1 / 86400, $1 % 86400 / 3600, $1 % 3600 / 60 }' /proc/uptime)
+top=$(ps -eo %cpu,comm --sort=-%cpu --no-headers | head -n3 | awk '{ c = $1; $1 = ""; sub(/^ /, ""); printf "%s%s %s%%", (NR > 1 ? "  ·  " : ""), $0, c }')
+
+jq -nc --argjson cpu_t "${cpu_t:-0}" --argjson gpu_t "${gpu_t:-0}" --argjson nvme_t "${nvme_t:-0}" \
+  --argjson fan "${fan:-0}" --argjson mhz "${mhz:-0}" --arg ip "$ip" --argjson down "$down" --argjson up "$up" \
+  --arg uptime "$up_s" --arg kernel "$(uname -r)" --arg host "$(</proc/sys/kernel/hostname)" --arg top "$top" \
+  '{cpu_t: $cpu_t, gpu_t: $gpu_t, nvme_t: $nvme_t, fan: $fan, mhz: $mhz, ip: $ip, down: $down, up: $up, uptime: $uptime, kernel: $kernel, host: $host, top: $top}'

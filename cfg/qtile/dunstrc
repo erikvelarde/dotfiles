@@ -1,0 +1,13 @@
+# dunst only receives notifications and records history; the popups are drawn by
+# eww (widgets/sidebar) from the script below. See widgets/sidebar/scripts/notify_hook.
+[global]
+    monitor = 0
+    follow = none
+    history_length = 100
+    notification_limit = 0
+    sort = yes
+    script = ~/.config/qtile/widgets/sidebar/scripts/notify_hook
+
+[all]
+    # no filters = matches everything: run the script and keep the history, but never draw
+    skip_display = true

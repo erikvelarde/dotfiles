@@ -143,3 +143,6 @@ export PATH="$HOME/.pub-cache/bin:$PATH"
 
 # must stay last: wraps all widgets defined above
 source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+
+# fvm for flutter
+export PATH="/home/erick/fvm/bin:$PATH"

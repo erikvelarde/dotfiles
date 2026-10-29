@@ -7,8 +7,19 @@
 (defpoll wifi :interval "10s" :initial "{\"signal\":0,\"ssid\":\"\",\"icon\":\"\",\"on\":false}" "~/.config/qtile/widgets/sidebar/scripts/wifi")
 (defpoll brightness :interval "5s" :initial "0" "brightnessctl -m | cut -d, -f4 | tr -d %")
 (defvar show_date false)
-(defpoll bt :interval "5s" :initial "{\"on\":false,\"connected\":0,\"icon\":\"\",\"name\":\"\"}" "~/.config/qtile/widgets/sidebar/scripts/bluetooth status")
+(defpoll bt :interval "5s" :initial "{\"on\":false,\"connected\":0,\"icon\":\"\",\"name\":\"\",\"battery\":-1}" "~/.config/qtile/widgets/sidebar/scripts/bluetooth status")
 (defpoll bat :interval "10s" :initial "{\"present\":false,\"cap\":0,\"icon\":\"\",\"status\":\"\",\"class\":\"normal\",\"ac\":false,\"power_w\":0,\"volt_v\":0,\"energy_now_wh\":0,\"energy_full_wh\":0,\"energy_design_wh\":0,\"health\":0,\"cycles\":0,\"tech\":\"\",\"model\":\"\",\"mfr\":\"\",\"time\":\"\",\"time_label\":\"\"}" "~/.config/qtile/widgets/sidebar/scripts/battery")
+(defvar settings_open false)
+(defvar notif_popups "[]")
+(defvar notif_history "[]")
+(defvar notif_count 0)
+(defvar notif_dnd false)
+(defvar audio_sinks "[]")
+(defvar audio_sources "[]")
+(defvar mic_muted false)
+(defpoll sysinfo :interval "3s" :run-while settings_open
+  :initial "{\"cpu_t\":0,\"gpu_t\":0,\"nvme_t\":0,\"fan\":0,\"mhz\":0,\"ip\":\"\",\"down\":0,\"up\":0,\"uptime\":\"\",\"kernel\":\"\",\"host\":\"\",\"top\":\"\"}"
+  "~/.config/qtile/widgets/sidebar/scripts/sysinfo")
 (defvar bt_devices "[]")
 (defvar bt_scanning false)
 (defvar bt_busy "")
@@ -80,7 +91,7 @@
               :onclick "~/.config/qtile/widgets/sidebar/scripts/popup toggle bluetooth &"
               :onrightclick "~/.config/qtile/widgets/sidebar/scripts/bluetooth power &"
       (box :class "stat bt ${bt.on ? '' : 'off'} ${bt.connected > 0 ? 'connected' : ''}"
-           :tooltip {bt.on ? (bt.connected > 0 ? "Connected: ${bt.name}" : "Bluetooth on") : "Bluetooth off"}
+           :tooltip {bt.on ? (bt.connected > 0 ? "Connected: ${bt.name}${bt.battery >= 0 ? ' · ' + bt.battery + '%' : ''}" : "Bluetooth on") : "Bluetooth off"}
         (label :class "icon" :text {bt.icon})))))
 
 ;; ---------- battery ----------
@@ -126,6 +137,9 @@
           (label :class "dname" :halign "start" :limit-width 26 :text {d.name})
           (label :class "dsub" :halign "start"
                  :text {bt_busy == d.mac ? "working..." : (d.connected ? "Connected" : (d.paired ? "Paired" : "Available"))}))))
+    (label :class "dbat ${d.battery <= 15 ? 'critical' : (d.battery <= 30 ? 'low' : '')}"
+           :visible {d.connected && d.battery >= 0}
+           :text "${d.battery <= 15 ? '󰁺' : (d.battery <= 30 ? '󰁻' : (d.battery <= 50 ? '󰁾' : (d.battery <= 80 ? '󰂀' : '󰁹')))} ${d.battery}%")
     (eventbox :cursor "pointer" :visible {d.paired}
               :tooltip "Forget device"
               :onclick "~/.config/qtile/widgets/sidebar/scripts/bluetooth forget ${d.mac} &"
@@ -147,11 +161,163 @@
         (for d in bt_devices (bt_device :d d))))
     (label :class "btempty" :visible {!bt.on} :text "Bluetooth is off")))
 
+;; ---------- settings overlay ----------
+(defwidget settings_w []
+  (eventbox :cursor "pointer" :tooltip "Settings"
+            :onclick "~/.config/qtile/widgets/sidebar/scripts/popup toggle settings &"
+    (box :class "module gear"
+      (label :class "icon" :text "󰒓"))))
+
+(defwidget scard [title icon]
+  (box :class "scard" :orientation "v" :space-evenly false :spacing 8
+    (box :space-evenly false :spacing 8
+      (label :class "sicon" :text icon)
+      (label :class "stitle" :halign "start" :hexpand true :text title))
+    (children)))
+
+(defwidget stoggle [on onclick]
+  (eventbox :cursor "pointer" :onclick onclick
+    (label :class "btswitch ${on ? 'on' : ''}" :text {on ? "ON" : "OFF"})))
+
+(defwidget sbutton [text onclick]
+  (eventbox :cursor "pointer" :onclick onclick
+    (label :class "btscan" :text text)))
+
+;; big launcher tile: glyph over label
+(defwidget stile [icon text onclick]
+  (eventbox :cursor "pointer" :onclick onclick
+    (box :class "stile" :orientation "v" :space-evenly false :spacing 4
+      (label :class "stileicon" :text icon)
+      (label :class "stiletext" :text text))))
+
+(defwidget sdevice [d]
+  (eventbox :cursor "pointer" :onclick "~/.config/qtile/widgets/sidebar/scripts/audio set ${d.id} &"
+    (box :class "dev ${d.default ? 'connected' : ''}" :space-evenly false
+      (label :class "dname" :halign "start" :limit-width 34 :text {d.name}))))
+
+(defwidget settings_menu_w []
+  (eventbox :onclick "~/.config/qtile/widgets/sidebar/scripts/popup close &"
+    (box :class "settings_overlay" :halign "fill" :valign "fill" :hexpand true :vexpand true
+      (eventbox :onclick "" :halign "center" :valign "center"
+        (box :orientation "v" :space-evenly false :spacing 14
+          (box :class "launcher" :space-evenly true :spacing 12
+            (stile :icon "󰝚" :text "Music" :onclick "~/.config/qtile/widgets/sidebar/scripts/launch music &")
+            (stile :icon "󰈹" :text "Browser" :onclick "~/.config/qtile/widgets/sidebar/scripts/launch browser &")
+            (stile :icon "" :text "Terminal" :onclick "~/.config/qtile/widgets/sidebar/scripts/launch terminal &")
+            (stile :icon "󰉋" :text "Files" :onclick "~/.config/qtile/widgets/sidebar/scripts/launch files &"))
+          (box :space-evenly false :spacing 14
+            (box :orientation "v" :space-evenly false :spacing 14
+              (scard :title "Wi-Fi" :icon {wifi.icon}
+                (box :orientation "v" :space-evenly false :spacing 6
+                  (box :space-evenly false
+                    (label :class "bk" :hexpand true :halign "start" :text {wifi.on ? wifi.ssid : "Not connected"})
+                    (stoggle :on {wifi.on} :onclick "nmcli radio wifi ${wifi.on ? 'off' : 'on'} &"))
+                  (brow :k "Signal" :v "${wifi.signal}%")
+                  (brow :k "IP" :v {sysinfo.ip == "" ? "-" : sysinfo.ip})
+                  (brow :k "Download" :v "${sysinfo.down} KB/s")
+                  (brow :k "Upload" :v "${sysinfo.up} KB/s")
+                  (sbutton :text "󰖩  Networks" :onclick "~/.config/qtile/scripts/network_menu &")))
+              (scard :title "Bluetooth" :icon {bt.icon}
+                (box :orientation "v" :space-evenly false :spacing 6
+                  (box :space-evenly false
+                    (label :class "bk" :hexpand true :halign "start"
+                           :text {bt.on ? (bt.connected > 0 ? bt.name : "No device connected") : "Off"})
+                    (stoggle :on {bt.on} :onclick "~/.config/qtile/widgets/sidebar/scripts/bluetooth power &"))
+                  (brow :k "Connected" :v "${bt.connected}")
+                  (brow :k "Device battery" :v {bt.battery >= 0 ? "${bt.battery}%" : "-"})
+                  (sbutton :text "󰑐  Scan / manage" :onclick "~/.config/qtile/widgets/sidebar/scripts/popup toggle bluetooth &"))))
+            (box :orientation "v" :space-evenly false :spacing 14
+              (scard :title "Audio" :icon {volume.muted ? "" : ""}
+                (box :orientation "v" :space-evenly false :spacing 6
+                  (box :space-evenly false :spacing 8
+                    (eventbox :cursor "pointer" :onclick "pactl set-sink-mute @DEFAULT_SINK@ toggle"
+                      (label :class "sicon ${volume.muted ? 'muted' : ''}" :text {volume.muted ? "" : ""}))
+                    (scale :class "sscale" :hexpand true :min 0 :max 101 :value {volume.vol}
+                           :onchange "wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ {}%")
+                    (label :class "bv" :text "${volume.vol}%"))
+                  (label :class "bk" :halign "start" :text "Output")
+                  (for d in audio_sinks (sdevice :d d))
+                  (box :space-evenly false :spacing 8
+                    (label :class "bk" :hexpand true :halign "start" :text "Input")
+                    (stoggle :on {!mic_muted} :onclick "~/.config/qtile/widgets/sidebar/scripts/audio mic-toggle; eww -c ~/.config/qtile/widgets/sidebar update mic_muted=$(~/.config/qtile/widgets/sidebar/scripts/audio mic) &"))
+                  (for d in audio_sources (sdevice :d d))
+                  (sbutton :text "󰕾  Mixer" :onclick "pavucontrol &")))
+              (scard :title "Brightness" :icon "󰃠"
+                (box :space-evenly false :spacing 8
+                  (scale :class "sscale" :hexpand true :min 1 :max 101 :value brightness
+                         :onchange "brightnessctl -q set {}%")
+                  (label :class "bv" :text "${brightness}%")))))
+          (scard :title "System" :icon "󰌢"
+            (box :orientation "h" :space-evenly false :spacing 24
+              (box :orientation "v" :space-evenly false :spacing 3
+                (brow :k "Host" :v {sysinfo.host})
+                (brow :k "Kernel" :v {sysinfo.kernel})
+                (brow :k "Uptime" :v {sysinfo.uptime})
+                (brow :k "CPU" :v "${round(EWW_CPU.avg, 0)}%  ·  ${sysinfo.mhz} MHz")
+                (brow :k "RAM" :v "${round(EWW_RAM.used_mem_perc, 0)}%  ·  ${round(EWW_RAM.used_mem / 1073741824, 1)} / ${round(EWW_RAM.total_mem / 1073741824, 1)} GB")
+                (brow :k "Disk /" :v "${round(EWW_DISK["/"].used_perc, 0)}%"))
+              (box :orientation "v" :space-evenly false :spacing 3
+                (brow :k "CPU temp" :v "${sysinfo.cpu_t}°C")
+                (brow :k "GPU temp" :v "${sysinfo.gpu_t}°C")
+                (brow :k "NVMe temp" :v "${sysinfo.nvme_t}°C")
+                (brow :k "Fan" :v {sysinfo.fan > 0 ? "${sysinfo.fan} RPM" : "-"})
+                (brow :k "Battery" :v "${bat.cap}%  ·  ${bat.status}")
+                (brow :k "Top" :v {sysinfo.top})))))))))
+
+;; ---------- notifications ----------
+(defwidget bell_w []
+  (eventbox :cursor "pointer" :tooltip "Notifications"
+            :onclick "~/.config/qtile/widgets/sidebar/scripts/popup toggle notifications &"
+            :onrightclick "~/.config/qtile/widgets/sidebar/scripts/notify_ctl dnd &"
+    (box :class "module bell ${notif_dnd ? 'dnd' : ''} ${notif_count > 0 ? 'unread' : ''}" :space-evenly false :spacing 5
+      (label :class "icon" :text {notif_dnd ? "󰂛" : (notif_count > 0 ? "󰂚" : "󰂜")})
+      (label :class "val ncount" :visible {notif_count > 0} :text "${notif_count}"))))
+
+;; one card for both the popups and the center; `onclose` runs when it is clicked / dismissed
+(defwidget ncard [n onclick onclose]
+  (eventbox :cursor "pointer" :onclick onclick
+    (box :class "ncard ${n.urgency} ${n.kind}" :orientation "v" :space-evenly false :spacing 6
+      (box :space-evenly false :spacing 10
+        (box :class "nicon-wrap" :valign "start"
+          (image :class "nimg" :visible {n.has_icon} :path {n.icon} :image-width 32 :image-height 32)
+          (label :class "nglyph" :visible {!n.has_icon} :text {n.glyph}))
+        (box :orientation "v" :space-evenly false :spacing 2 :hexpand true :valign "center"
+          (box :space-evenly false :spacing 6
+            (label :class "napp" :halign "start" :hexpand true :limit-width 24 :text {n.app})
+            (label :class "ntime" :halign "end" :text {n.time}))
+          (label :class "nsum" :halign "start" :xalign 0 :limit-width 38 :text {n.summary})
+          (label :class "nbody" :halign "start" :xalign 0
+                 :visible {n.body != "" && n.kind != "progress"} :text {n.body}))
+        (eventbox :cursor "pointer" :valign "start" :visible {onclose != ""} :onclick onclose
+          (label :class "nclose" :text "󰅖")))
+      (box :class "nprog" :visible {n.kind == "progress"} :space-evenly false :spacing 8
+        (progress :class "nbar" :hexpand true :value {n.progress} :orientation "h" :flipped false)
+        (label :class "nval" :text "${n.progress}%")))))
+
+(defwidget notif_popups_w []
+  (box :class "npopups" :orientation "v" :space-evenly false :spacing 8
+    (for n in notif_popups
+      (ncard :n n :onclick "~/.config/qtile/widgets/sidebar/scripts/notify_ctl dismiss_popup ${n.uid} &" :onclose ""))))
+
+(defwidget notif_menu_w []
+  (box :class "nmenu" :orientation "v" :space-evenly false :spacing 8
+    (box :space-evenly false :spacing 8
+      (label :class "bttitle" :halign "start" :hexpand true :text "󰂚  Notifications")
+      (eventbox :cursor "pointer" :tooltip "Do not disturb" :onclick "~/.config/qtile/widgets/sidebar/scripts/notify_ctl dnd &"
+        (label :class "btswitch ${notif_dnd ? 'on' : ''}" :text {notif_dnd ? "DND ON" : "DND OFF"}))
+      (eventbox :cursor "pointer" :visible {notif_count > 0} :onclick "~/.config/qtile/widgets/sidebar/scripts/notify_ctl clear &"
+        (label :class "btswitch" :text "Clear")))
+    (scroll :vscroll true :hscroll false :height 380
+      (box :orientation "v" :space-evenly false :spacing 6
+        (label :class "btempty" :visible {notif_count == 0} :text "No notifications")
+        (for n in notif_history
+          (ncard :n n :onclick "" :onclose "~/.config/qtile/widgets/sidebar/scripts/notify_ctl dismiss ${n.uid} &"))))))
+
 (defwidget bar_w []
   (centerbox :class "bar" :orientation "h"
-    (box :halign "start" :space-evenly false :spacing 6 (workspaces_w) (system_w))
+    (box :halign "start" :space-evenly false :spacing 6 (settings_w) (workspaces_w) (system_w))
     (box :halign "center" (clock_w))
-    (box :halign "end" :space-evenly false :spacing 6 (controls_w) (quick_w) (battery_w))))
+    (box :halign "end" :space-evenly false :spacing 6 (controls_w) (quick_w) (bell_w) (battery_w))))
 
 ;; ---------- window ----------
 (defwindow sidebar
@@ -178,6 +344,31 @@
   :stacking "fg"
   :wm-ignore false
   (battery_menu_w))
+
+(defwindow notifications_menu
+  :monitor 0
+  :geometry (geometry :x "8px" :y "38px" :width "380px" :anchor "top right")
+  :windowtype "dock"
+  :stacking "fg"
+  :wm-ignore false
+  (notif_menu_w))
+
+;; popups are click-through-free cards drawn top right, below the bar
+(defwindow notif_popups
+  :monitor 0
+  :geometry (geometry :x "8px" :y "40px" :width "360px" :anchor "top right")
+  :windowtype "dock"
+  :stacking "overlay"
+  :wm-ignore false
+  (notif_popups_w))
+
+(defwindow settings_menu
+  :monitor 0
+  :geometry (geometry :x "0px" :y "32px" :width "100%" :height "100%" :anchor "top left")
+  :windowtype "dock"
+  :stacking "fg"
+  :wm-ignore false
+  (settings_menu_w))
 
 ;; transparent layer behind the popups: any click closes them (starts below the bar)
 (defwindow popup_catcher

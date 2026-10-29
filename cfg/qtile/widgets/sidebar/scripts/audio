@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# Audio device helper for the settings overlay (PipeWire/WirePlumber).
+#   list sinks|sources | set ID | mic-toggle | mic
+# `list` prints JSON: [{id, name, default}]
+list() {
+  local kind=$1 section
+  [[ $kind == sinks ]] && section=Sinks || section=Sources
+  wpctl status | awk -v sec="$section:" '
+    /^(Video|Settings)/ { exit }
+    $0 ~ /^ [├└]─ / { insec = index($0, sec) > 0; next }
+    insec && match($0, /[0-9]+\. /) {
+      line = $0; def = (line ~ /\*/) ? "true" : "false"
+      id = substr(line, RSTART, RLENGTH - 2)
+      name = substr(line, RSTART + RLENGTH); sub(/ *\[vol:.*/, "", name); sub(/ +$/, "", name)
+      sub(/ +$/, "", name); gsub(/"/, "", name)
+      printf "%s%s\t%s\t%s", (n++ ? "\n" : ""), id, def, name
+    }' | jq -Rsc 'split("\n") | map(select(length > 0) | split("\t") | {id: .[0], default: (.[1] == "true"), name: .[2]})'
+}
+case "$1" in
+  list) list "$2" ;;
+  set)
+    wpctl set-default "$2"
+    eww -c "$HOME/.config/qtile/widgets/sidebar" update \
+      audio_sinks="$(list sinks)" audio_sources="$(list sources)" ;;
+  mic-toggle) wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle ;;
+  mic) wpctl get-volume @DEFAULT_AUDIO_SOURCE@ | grep -q MUTED && echo true || echo false ;;
+  *) echo "usage: $0 list sinks|sources | set ID | mic-toggle | mic" >&2; exit 1 ;;
+esac

@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+# State + actions for the eww notification popups / center.
+#   push | init | dismiss UID | dismiss_popup UID | clear | dnd [toggle|on|off]
+# State lives in ~/.cache/eww-notif (popups.json, history.json, dnd flag).
+cfg="$HOME/.config/qtile/widgets/sidebar"
+dir="${XDG_CACHE_HOME:-$HOME/.cache}/eww-notif"
+mkdir -p "$dir"
+[[ -s $dir/popups.json ]] || echo '[]' >"$dir/popups.json"
+[[ -s $dir/history.json ]] || echo '[]' >"$dir/history.json"
+
+eww_() { eww -c "$cfg" "$@"; }
+
+# send the files to eww and open/close the popup window as needed
+push() {
+  local popups history dnd=false
+  popups=$(<"$dir/popups.json"); history=$(<"$dir/history.json")
+  [[ -e $dir/dnd ]] && dnd=true
+  eww_ update notif_popups="$popups" notif_history="$history" \
+    notif_count="$(jq length <<<"$history")" notif_dnd="$dnd" >/dev/null 2>&1
+  if [[ $(jq length <<<"$popups") -gt 0 ]]; then
+    eww_ active-windows 2>/dev/null | grep -q '^notif_popups:' || eww_ open notif_popups >/dev/null 2>&1
+  else
+    eww_ close notif_popups >/dev/null 2>&1
+  fi
+}
+
+# rewrite a state file through a jq filter, under the lock
+edit() { # file filter [jq args...]
+  local f="$dir/$1.json" filter=$2; shift 2
+  jq -c "$@" "$filter" "$f" >"$f.tmp" && mv "$f.tmp" "$f"
+}
+
+run() (
+  flock 9
+  case "$1" in
+    push) ;;
+    init) echo '[]' >"$dir/popups.json" ;;
+    dismiss) edit history 'map(select(.uid != $u))' --arg u "$2" ;;
+    dismiss_popup) edit popups 'map(select(.uid != $u))' --arg u "$2" ;;
+    clear)
+      echo '[]' >"$dir/history.json"; echo '[]' >"$dir/popups.json"
+      dunstctl history-clear >/dev/null 2>&1 ;;
+    dnd)
+      case "$2" in
+        on) touch "$dir/dnd" ;;
+        off) rm -f "$dir/dnd" ;;
+        *) [[ -e $dir/dnd ]] && rm -f "$dir/dnd" || touch "$dir/dnd" ;;
+      esac ;;
+    *) echo "usage: $0 push|init|dismiss UID|dismiss_popup UID|clear|dnd [on|off]" >&2; exit 1 ;;
+  esac
+  push
+) 9>"$dir/lock"
+
+run "$@"
