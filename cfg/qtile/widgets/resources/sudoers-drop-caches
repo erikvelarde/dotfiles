@@ -1,0 +1,3 @@
+# Optional: lets "Clean RAM" drop the page cache without a password.
+# Install:  sudo install -m 440 sudoers-drop-caches /etc/sudoers.d/drop-caches   (check the username)
+erick ALL=(root) NOPASSWD: /usr/bin/tee /proc/sys/vm/drop_caches

@@ -1,3 +1,4 @@
+import subprocess
 from libqtile.config import Key
 from libqtile import qtile
 from libqtile.lazy import lazy
@@ -14,10 +15,37 @@ from global_variables import (
     color_picker,
     dashboard,
     magnifier,
+    eyecare,
+    settings_menu,
+    resources,
     web_browser_secodary
 )  # >> ignore the next error
 
 #  eww_dashboard = "~/.config/qtile/widgets/dashboard/lauch_dashboard"
+
+
+@lazy.function
+def close_settings(qtile):
+    """Plain Escape: only grabbed while the settings menu is open."""
+    qtile.ungrab_key(escape_key)
+    subprocess.Popen(settings_menu.replace("toggle settings", "close"), shell=True)
+
+
+escape_key = Key([], "Escape", close_settings)
+
+
+@lazy.function
+def open_settings(qtile):
+    """Super+Escape toggles the settings menu; Escape then closes it."""
+    subprocess.run(settings_menu, shell=True)
+    opened = subprocess.run(
+        "eww -c ~/.config/qtile/widgets/sidebar active-windows | grep -q '^settings_menu:'",
+        shell=True,
+    ).returncode == 0
+    if opened:
+        qtile.grab_key(escape_key)
+    else:
+        qtile.ungrab_key(escape_key)
 
 
 @lazy.function
@@ -47,6 +75,9 @@ keys = [
     Key([mod, "shift"], "c", lazy.spawn(web_browser_secodary), desc="Launch Chrome browser"),
     #  Key([""], "", lazy.spawn(web_browser), desc="Launch web browser"),
     Key(["control"], "Escape", lazy.spawn("pkill -9 eww")),
+    Key([mod], "Escape", open_settings, desc="Toggle settings menu"),
+    Key([mod, "shift"], "e", lazy.spawn(eyecare), desc="Toggle eye care (night filter)"),
+    Key([mod, "shift"], "r", lazy.spawn(resources), desc="Toggle resources widget"),
     # Rofi Applets --
     Key(
         [mod],

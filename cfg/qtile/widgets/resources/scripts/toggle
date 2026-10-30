@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# Open/close the Resources widget (click outside it to close).
+cfg="$HOME/.config/qtile/widgets/resources"
+eww_() { eww -c "$cfg" "$@"; }
+
+if eww_ active-windows 2>/dev/null | grep -q "^resources:"; then
+  eww_ update res_open=false
+  eww_ close resources res_catcher
+else
+  eww_ update res_open=true procs="$("$cfg/scripts/procs")"
+  eww_ open res_catcher
+  eww_ open resources
+fi

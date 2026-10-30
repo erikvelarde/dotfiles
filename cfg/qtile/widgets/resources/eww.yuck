@@ -1,0 +1,59 @@
+;; Resources widget: running user apps + one-click RAM/CPU cleaning.
+;; Toggled by scripts/toggle (Qtile key / click on the bar's RAM or CPU stat)
+
+;; ---------- data ----------
+(defvar res_open false)
+(defpoll procs :interval "2s" :run-while res_open :initial "[]"
+  "~/.config/qtile/widgets/resources/scripts/procs")
+
+;; ---------- widgets ----------
+(defwidget meter [icon class text value]
+  (box :class "meter ${class}" :orientation "v" :space-evenly false :spacing 6
+    (box :space-evenly false
+      (label :class "icon" :text icon)
+      (label :class "val" :hexpand true :halign "end" :text text))
+    (progress :class "bar" :value value)))
+
+(defwidget app_row [app]
+  (box :class "app" :space-evenly false :spacing 10
+    (label :class "name" :halign "start" :hexpand true :limit-width 18
+           :text "${app.name}${app.count > 1 ? ' ×' + app.count : ''}${app.idle ? '  idle' : ''}")
+    (label :class "cpu" :text "${app.cpu}%")
+    (label :class "mem" :text "${app.mem} MB")
+    (button :class "kill" :tooltip "Kill ${app.name}"
+            :onclick "~/.config/qtile/widgets/resources/scripts/clean '${app.name}' &"
+      "󰅖")))
+
+(defwidget resources_w []
+  (box :class "res_card" :orientation "v" :space-evenly false :spacing 12
+    (box :space-evenly false
+      (label :class "title" :halign "start" :hexpand true :text "󰍛  Resources")
+      (button :class "close" :onclick "~/.config/qtile/widgets/resources/scripts/toggle &" "󰅖"))
+    (box :space-evenly true :spacing 12
+      (meter :class "ram" :icon "" :value {EWW_RAM.used_mem_perc}
+             :text "${round(EWW_RAM.used_mem / 1000000000, 1)} / ${round(EWW_RAM.total_mem / 1000000000, 1)} GB")
+      (meter :class "cpu" :icon "󰍛" :value {EWW_CPU.avg}
+             :text "${round(EWW_CPU.avg, 0)}%"))
+    (box :space-evenly true :spacing 12
+      (button :class "clean ram" :onclick "~/.config/qtile/widgets/resources/scripts/clean ram &" "  Clean RAM")
+      (button :class "clean cpu" :onclick "~/.config/qtile/widgets/resources/scripts/clean cpu &" "󰍛  Clean CPU"))
+    (box :class "apps" :orientation "v" :space-evenly false :spacing 4
+      (label :class "empty" :visible {arraylength(procs) == 0} :text "No apps to clean")
+      (for app in procs (app_row :app app)))
+    (button :class "clean all" :visible {arraylength(procs) > 0}
+            :onclick "~/.config/qtile/widgets/resources/scripts/clean all &"
+      "󰆴  Kill all")))
+
+;; ---------- windows ----------
+(defwindow res_catcher
+  :monitor 0
+  :geometry (geometry :x "0px" :y "0px" :width "100%" :height "100%" :anchor "top left")
+  :windowtype "dock" :stacking "fg" :wm-ignore false
+  (eventbox :onclick "~/.config/qtile/widgets/resources/scripts/toggle &"
+    (box :class "catcher")))
+
+(defwindow resources
+  :monitor 0
+  :geometry (geometry :x "0px" :y "0px" :width "460px" :anchor "center")
+  :windowtype "dock" :stacking "fg" :wm-ignore false
+  (resources_w))

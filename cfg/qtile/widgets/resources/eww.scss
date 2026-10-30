@@ -1,0 +1,69 @@
+// palette from ~/.config/qtile/bar/colors.ini
+$bg: #0f1013;
+$surface: #1c1f26;
+$track: #2a2e36;
+$fg: #abb2bf;
+$dim: #4b5263;
+$red: #e16b75;
+$magenta: #c678dd;
+$cyan: #56b6c2;
+$white: #dcdfe4;
+
+* {
+  all: unset;
+  font-family: "JetBrains Mono", "Symbols Nerd Font";
+  font-weight: bold;
+  font-size: 14px;
+  color: $fg;
+}
+
+.catcher { background-color: transparent; }
+
+.res_card {
+  background-color: $bg;
+  border: 1px solid $track;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.title { font-size: 16px; color: $white; }
+.close { color: $dim; padding: 0 6px; }
+.close:hover { color: $red; }
+
+.meter {
+  background-color: $surface;
+  border-radius: 8px;
+  padding: 10px 12px;
+  .icon { font-family: "Symbols Nerd Font"; font-size: 17px; }
+  .bar trough { background-color: $track; border-radius: 4px; min-height: 6px; }
+  .bar progress { border-radius: 4px; min-height: 6px; }
+  &.ram .icon, &.ram .bar progress { color: $cyan; background-color: $cyan; }
+  &.cpu .icon, &.cpu .bar progress { color: $magenta; background-color: $magenta; }
+  .icon { background-color: transparent; }
+}
+
+.clean {
+  background-color: $surface;
+  border-radius: 8px;
+  padding: 10px 0;
+  color: $white;
+  .label { color: $white; }
+  &:hover { background-color: $track; }
+  &.ram { border-bottom: 2px solid $cyan; }
+  &.cpu { border-bottom: 2px solid $magenta; }
+  &.all { border-bottom: 2px solid $red; }
+  &.all:hover { background-color: $red; }
+}
+
+.apps { background-color: $surface; border-radius: 8px; padding: 6px; }
+.app {
+  padding: 6px 8px;
+  border-radius: 6px;
+  .name { color: $white; }
+  .cpu { color: $magenta; min-width: 60px; }
+  .mem { color: $cyan; min-width: 80px; }
+  .kill { color: $dim; padding: 0 6px; }
+  .kill:hover { color: $red; }
+}
+.app:hover { background-color: $track; }
+.empty { color: $dim; padding: 10px; }

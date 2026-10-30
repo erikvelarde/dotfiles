@@ -30,3 +30,5 @@ pkill -9 eww
 
 "$qdir"/scripts/sidebar_setup --up
 redshift -c ~/.config/redshift/redshift.conf &
+
+pkill -x xcape

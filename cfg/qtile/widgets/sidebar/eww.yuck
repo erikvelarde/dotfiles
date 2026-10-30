@@ -7,6 +7,8 @@
 (defpoll wifi :interval "10s" :initial "{\"signal\":0,\"ssid\":\"\",\"icon\":\"\",\"on\":false}" "~/.config/qtile/widgets/sidebar/scripts/wifi")
 (defpoll brightness :interval "5s" :initial "0" "brightnessctl -m | cut -d, -f4 | tr -d %")
 (defvar show_date false)
+(defvar eye_on false)
+(defvar eye_temp 3500)
 (defpoll bt :interval "5s" :initial "{\"on\":false,\"connected\":0,\"icon\":\"\",\"name\":\"\",\"battery\":-1}" "~/.config/qtile/widgets/sidebar/scripts/bluetooth status")
 (defpoll bat :interval "10s" :initial "{\"present\":false,\"cap\":0,\"icon\":\"\",\"status\":\"\",\"class\":\"normal\",\"ac\":false,\"power_w\":0,\"volt_v\":0,\"energy_now_wh\":0,\"energy_full_wh\":0,\"energy_design_wh\":0,\"health\":0,\"cycles\":0,\"tech\":\"\",\"model\":\"\",\"mfr\":\"\",\"time\":\"\",\"time_label\":\"\"}" "~/.config/qtile/widgets/sidebar/scripts/battery")
 (defvar settings_open false)
@@ -56,11 +58,11 @@
     (stat :class "ram" :icon ""
           :value {EWW_RAM.used_mem_perc} :text "${round(EWW_RAM.used_mem_perc, 0)}%"
           :tip "RAM ${round(EWW_RAM.used_mem / 1000000000, 1)} / ${round(EWW_RAM.total_mem / 1000000000, 1)} GB"
-          :onclick "alacritty -e htop &" :onrightclick "" :onscroll "")
+          :onclick "~/.config/qtile/widgets/resources/scripts/toggle &" :onrightclick "" :onscroll "")
     (stat :class "cpu" :icon "󰍛"
           :value {EWW_CPU.avg} :text "${round(EWW_CPU.avg, 0)}%"
           :tip "CPU ${round(EWW_CPU.avg, 1)}%"
-          :onclick "alacritty -e htop &" :onrightclick "" :onscroll "")
+          :onclick "~/.config/qtile/widgets/resources/scripts/toggle &" :onrightclick "" :onscroll "")
     (stat :class "disk" :icon "󰋊"
           :value {EWW_DISK["/"].used_perc} :text "${round(EWW_DISK["/"].used_perc, 0)}%"
           :tip "Disk / ${round(EWW_DISK["/"].used / 1000000000, 0)} / ${round(EWW_DISK["/"].total / 1000000000, 0)} GB"
@@ -246,7 +248,16 @@
                 (box :space-evenly false :spacing 8
                   (scale :class "sscale" :hexpand true :min 1 :max 101 :value brightness
                          :onchange "brightnessctl -q set {}%")
-                  (label :class "bv" :text "${brightness}%")))))
+                  (label :class "bv" :text "${brightness}%")))
+              (scard :title "Eye care" :icon "\U000F0208"
+                (box :orientation "v" :space-evenly false :spacing 6
+                  (box :space-evenly false
+                    (label :class "bk" :hexpand true :halign "start" :text "Night filter")
+                    (stoggle :on {eye_on} :onclick "~/.config/qtile/scripts/qtile_eyecare; eww -c ~/.config/qtile/widgets/sidebar update eye_on=$(~/.config/qtile/scripts/qtile_eyecare --status) eye_temp=$(~/.config/qtile/scripts/qtile_eyecare --get) &"))
+                  (box :space-evenly false :spacing 8
+                    (scale :class "sscale" :hexpand true :min 1000 :max 6500 :value {eye_temp}
+                           :onchange "~/.config/qtile/scripts/qtile_eyecare --temp {}; eww -c ~/.config/qtile/widgets/sidebar update eye_on=true eye_temp={}")
+                    (label :class "bv" :text "${round(eye_temp, 0)}K"))))))
           (scard :title "System" :icon "󰌢"
             (box :orientation "h" :space-evenly false :spacing 24
               (box :orientation "v" :space-evenly false :spacing 3
@@ -315,9 +326,9 @@
 
 (defwidget bar_w []
   (centerbox :class "bar" :orientation "h"
-    (box :halign "start" :space-evenly false :spacing 6 (settings_w) (workspaces_w) (system_w))
+    (box :halign "start" :space-evenly false :spacing 6 (workspaces_w) (system_w))
     (box :halign "center" (clock_w))
-    (box :halign "end" :space-evenly false :spacing 6 (controls_w) (quick_w) (bell_w) (battery_w))))
+    (box :halign "end" :space-evenly false :spacing 6 (controls_w) (quick_w) (settings_w) (battery_w))))
 
 ;; ---------- window ----------
 (defwindow sidebar

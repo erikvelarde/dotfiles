@@ -8,7 +8,7 @@ vim.lsp.enable("lua_ls", true)
 -- those language which are disabled is because I am learning it right now. I don't use it in job
 vim.lsp.enable("rust_analyzer", false)
 -- vim.lsp.enable("phpcsfixer", false)
-vim.lsp.enable("gopls", false)
+vim.lsp.enable("gopls", true)
 vim.lsp.enable("clangd", false)
 -- TODO: integrate the another programming language that I work with.
 --

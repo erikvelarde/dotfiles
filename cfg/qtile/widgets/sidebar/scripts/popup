@@ -28,6 +28,8 @@ case "$1" in
         eww_ update audio_sinks="$("$cfg/scripts/audio" list sinks)" \
           audio_sources="$("$cfg/scripts/audio" list sources)" \
           mic_muted="$("$cfg/scripts/audio" mic)" \
+          eye_on="$(~/.config/qtile/scripts/qtile_eyecare --status)" \
+          eye_temp="$(~/.config/qtile/scripts/qtile_eyecare --get)" \
           bt_devices="$("$cfg/scripts/bluetooth" list)" settings_open=true
       else
         # catcher first so it sits below the popup

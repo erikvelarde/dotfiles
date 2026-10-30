@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+## Eye-care (blue light) filter: toggle, set temperature, query state.
+##   qtile_eyecare           toggle on/off (on = automatic day/night via redshift)
+##   qtile_eyecare --temp N  fixed temperature in Kelvin (1000-6500)
+##   qtile_eyecare --status  print true/false
+##   qtile_eyecare --get     print the current manual temperature
+
+CONF="$HOME/.config/redshift/redshift.conf"
+STATE="$HOME/.cache/eyecare_temp"
+
+is_on() { pgrep -x redshift >/dev/null || [ -f "$STATE" ]; }
+
+case "$1" in
+--status)
+	is_on && echo true || echo false
+	;;
+--get)
+	cat "$STATE" 2>/dev/null || echo 3500
+	;;
+--temp)
+	pkill -x redshift
+	mkdir -p "$(dirname "$STATE")"
+	echo "$2" >"$STATE"
+	redshift -P -O "$2" >/dev/null
+	;;
+*)
+	if is_on; then
+		pkill -x redshift
+		rm -f "$STATE"
+		redshift -x >/dev/null
+		notify-send -t 1500 "Eye care" "Off"
+	else
+		redshift -c "$CONF" &
+		notify-send -t 1500 "Eye care" "On"
+	fi
+	;;
+esac
